@@ -3,50 +3,44 @@ import os
 import json
 import time
 
-TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
-CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")  # For simplicity, one user only
-
-TELEGRAM_API = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}"
+TOKEN = os.getenv("TELEGRAM_TOKEN")
+OWNER_ID = int(os.getenv("TELEGRAM_OWNER_ID"))
+TELEGRAM_API = f"https://api.telegram.org/bot{TOKEN}"
 REPOS_FILE = "repos.json"
+pending_confirmations = {}
 
-def send_message(text, reply_to=None, buttons=None):
-    data = {
-        "chat_id": CHAT_ID,
+def send_message(chat_id, text, reply_to=None, buttons=None):
+    payload = {
+        "chat_id": chat_id,
         "text": text,
         "parse_mode": "Markdown"
     }
     if reply_to:
-        data["reply_to_message_id"] = reply_to
+        payload["reply_to_message_id"] = reply_to
     if buttons:
-        data["reply_markup"] = {
+        payload["reply_markup"] = {
             "inline_keyboard": buttons
         }
-    requests.post(f"{TELEGRAM_API}/sendMessage", json=data)
+    requests.post(f"{TELEGRAM_API}/sendMessage", json=payload)
 
 def get_updates(offset=None):
     url = f"{TELEGRAM_API}/getUpdates"
     params = {"timeout": 30}
     if offset:
         params["offset"] = offset
-    response = requests.get(url, params=params)
-    return response.json()["result"]
+    return requests.get(url, params=params).json().get("result", [])
 
 def get_latest_release(repo):
     url = f"https://api.github.com/repos/{repo}/releases/latest"
-    response = requests.get(url)
-    if response.status_code == 200:
-        return response.json()
-    return None
+    r = requests.get(url)
+    return r.json() if r.status_code == 200 else None
 
 def load_repos():
-    if os.path.exists(REPOS_FILE):
-        with open(REPOS_FILE, "r") as f:
-            return json.load(f)
-    return {}
+    return json.load(open(REPOS_FILE)) if os.path.exists(REPOS_FILE) else {}
 
-def save_repos(repos):
+def save_repos(data):
     with open(REPOS_FILE, "w") as f:
-        json.dump(repos, f, indent=2)
+        json.dump(data, f, indent=2)
 
 def parse_repo_link(text):
     if "github.com/" in text:
@@ -56,66 +50,63 @@ def parse_repo_link(text):
     return None
 
 def main():
-    last_update_id = None
-    pending_confirmations = {}
+    offset = None
     repos = load_repos()
 
     while True:
-        updates = get_updates(last_update_id)
+        updates = get_updates(offset)
         for update in updates:
-            last_update_id = update["update_id"] + 1
+            offset = update["update_id"] + 1
 
-            if "message" not in update:
-                continue
+            # Only allow messages from the owner
+            if "message" in update:
+                msg = update["message"]
+                chat_id = msg["chat"]["id"]
+                user_id = msg["from"]["id"]
+                message_id = msg["message_id"]
+                text = msg.get("text", "")
 
-            msg = update["message"]
-            text = msg.get("text", "")
-            message_id = msg["message_id"]
+                if user_id != OWNER_ID:
+                    send_message(chat_id, "⛔ Only the owner can use this bot.")
+                    continue
 
-            if "/start" in text:
-                send_message("👋 Send me a GitHub repo link to start tracking releases!", message_id)
-                continue
-
-            repo = parse_repo_link(text)
-            if repo:
-                # Ask for confirmation
-                pending_confirmations[CHAT_ID] = repo
-                send_message(f"🧐 You sent: `{repo}`\n\nDo you want to track this repo's releases?",
-                             message_id,
-                             buttons=[
-                                 [{"text": "✅ Yes", "callback_data": "confirm_add"}],
-                                 [{"text": "❌ No", "callback_data": "cancel"}]
-                             ])
-            else:
-                send_message("❌ Invalid GitHub repo link. Please send a full repo link like:\n`https://github.com/owner/repo`", message_id)
-
-        # Check for callback queries (confirmation)
-        updates = get_updates(last_update_id)
-        for update in updates:
-            last_update_id = update["update_id"] + 1
+                repo = parse_repo_link(text)
+                if repo:
+                    pending_confirmations[chat_id] = repo
+                    send_message(chat_id,
+                        f"🧐 You sent: `{repo}`\nDo you want to track this repo's releases?",
+                        reply_to=message_id,
+                        buttons=[
+                            [{"text": "✅ Yes", "callback_data": "confirm_add"}],
+                            [{"text": "❌ No", "callback_data": "cancel"}]
+                        ]
+                    )
 
             if "callback_query" in update:
                 callback = update["callback_query"]
                 data = callback["data"]
-                msg = callback["message"]
-                message_id = msg["message_id"]
+                user_id = callback["from"]["id"]
+                chat_id = callback["message"]["chat"]["id"]
+                message_id = callback["message"]["message_id"]
+
+                if user_id != OWNER_ID:
+                    send_message(chat_id, "⛔ You are not authorized to confirm.")
+                    continue
 
                 if data == "confirm_add":
-                    repo = pending_confirmations.get(CHAT_ID)
+                    repo = pending_confirmations.get(chat_id)
                     if repo:
                         release = get_latest_release(repo)
                         if release:
                             repos[repo] = release["tag_name"]
                             save_repos(repos)
-                            send_message(f"✅ Now tracking *{repo}* releases!", message_id)
+                            send_message(chat_id, f"✅ Tracking `{repo}` releases.")
                         else:
-                            send_message("⚠️ Failed to fetch latest release. Check the repo exists or has releases.", message_id)
-                    else:
-                        send_message("Something went wrong. Please try again.", message_id)
+                            send_message(chat_id, f"❌ Could not fetch releases for `{repo}`.")
                 elif data == "cancel":
-                    send_message("❌ Cancelled.", message_id)
+                    send_message(chat_id, "❌ Cancelled.")
 
-        time.sleep(5)  # prevent spamming the Telegram API
+        time.sleep(5)
 
 if __name__ == "__main__":
     main()
