@@ -1,5 +1,4 @@
-import os, requests, json, time
-from io import BytesIO
+import os, requests, json, time, re
 import matplotlib.pyplot as plt
 
 TOKEN = os.getenv("TELEGRAM_TOKEN")
@@ -9,145 +8,97 @@ REPOS_FILE = "repos.json"
 HISTORY_FILE = "history.json"
 PENDING = {}
 
-# ---------------------------------
-# Safe functions
-# ---------------------------------
-
-def safe_get(url, timeout=10):
-    try:
-        r = requests.get(url, timeout=timeout)
-        if r.status_code == 200:
-            return r.json()
-        else:
-            print(f"[HTTP Error] {url} → {r.status_code}")
-    except Exception as e:
-        print(f"[GET FAILED] {url} → {e}")
-    return None
-
 def send_msg(chat_id, text, reply_to=None, buttons=None):
-    try:
-        data = {
-            "chat_id": chat_id,
-            "text": text,
-            "parse_mode": "Markdown",
-            "disable_web_page_preview": True
-        }
-        if reply_to: data["reply_to_message_id"] = reply_to
-        if buttons: data["reply_markup"] = {"inline_keyboard": buttons}
-        return requests.post(f"{API}/sendMessage", json=data, timeout=10).json()
-    except Exception as e:
-        print(f"[SEND MSG ERROR] {e}")
-
-def send_photo(chat_id, image_bytes, caption=None):
-    try:
-        files = {"photo": ("chart.png", image_bytes)}
-        data = {"chat_id": chat_id}
-        if caption:
-            data["caption"] = caption
-        requests.post(f"{API}/sendPhoto", data=data, files=files, timeout=20)
-    except Exception as e:
-        print(f"[SEND PHOTO ERROR] {e}")
+    data = {
+        "chat_id": chat_id,
+        "text": text,
+        "parse_mode": "Markdown"
+    }
+    if reply_to: data["reply_to_message_id"] = reply_to
+    if buttons:
+        data["reply_markup"] = {"inline_keyboard": buttons}
+    return requests.post(f"{API}/sendMessage", json=data).json()
 
 def delete_msg(chat_id, msg_id):
-    try:
-        requests.post(f"{API}/deleteMessage", json={
-            "chat_id": chat_id,
-            "message_id": msg_id
-        }, timeout=5)
-    except:
-        pass
+    requests.post(f"{API}/deleteMessage", json={
+        "chat_id": chat_id,
+        "message_id": msg_id
+    })
 
 def get_updates(offset=None):
-    try:
-        params = {"timeout": 30, "offset": offset} if offset else {"timeout": 30}
-        return requests.get(f"{API}/getUpdates", params=params, timeout=40).json().get("result", [])
-    except Exception as e:
-        print(f"[UPDATES ERROR] {e}")
-        return []
+    params = {"timeout": 30, "offset": offset} if offset else {"timeout": 30}
+    return requests.get(f"{API}/getUpdates", params=params).json().get("result", [])
 
-# ---------------------------------
-# Repo storage and visualization
-# ---------------------------------
+def get_latest(repo):
+    r = requests.get(f"https://api.github.com/repos/{repo}/releases/latest")
+    return r.json() if r.status_code == 200 else None
 
-def parse_repo(text):
-    if "github.com/" in text:
-        parts = text.split("github.com/")[1].split("/")
-        if len(parts) >= 2:
-            return f"{parts[0]}/{parts[1].split()[0]}"
-    return None
-
-def load_file(path):
-    return json.load(open(path)) if os.path.exists(path) else {}
-
-def save_file(data, path):
-    with open(path, "w") as f:
-        json.dump(data, f, indent=2)
-
-def load_repos_from_env():
-    raw = os.getenv("TRACKED_REPOS", "")
-    repos = {}
-    for r in raw.split(","):
-        r = r.strip()
-        if r:
-            repos[r] = ""
+def load_repos():
+    if os.path.exists(REPOS_FILE):
+        with open(REPOS_FILE) as f:
+            return json.load(f)
+    fallback = os.getenv("TRACKED_REPOS", "")
+    repos = {r.strip(): "" for r in fallback.split(",") if "/" in r}
+    save_repos(repos)
     return repos
 
-def draw_chart(repos):
-    history = load_file(HISTORY_FILE)
-    labels = []
-    counts = []
+def save_repos(r):
+    with open(REPOS_FILE, "w") as f:
+        json.dump(r, f, indent=2)
 
-    for repo in repos:
-        labels.append(repo)
-        counts.append(len(history.get(repo, [])))
+def load_history():
+    if os.path.exists(HISTORY_FILE):
+        with open(HISTORY_FILE) as f:
+            return json.load(f)
+    return {}
 
-    if not labels:
+def save_history(h):
+    with open(HISTORY_FILE, "w") as f:
+        json.dump(h, f, indent=2)
+
+def parse_repos(text):
+    possible = re.findall(r"[a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+", text)
+    return list(set(possible))
+
+def create_chart(history):
+    counts = {repo: len(tags) for repo, tags in history.items()}
+    if not counts:
         return None
-
-    plt.figure(figsize=(10, 4))
-    plt.bar(labels, counts, color='skyblue')
-    plt.xticks(rotation=30, ha='right')
-    plt.title("Release Count per Repo")
+    repos, totals = zip(*sorted(counts.items(), key=lambda x: -x[1])[:10])
+    plt.figure(figsize=(8, 4))
+    plt.barh(repos, totals, color="skyblue")
+    plt.xlabel("Total Releases")
+    plt.title("📊 Top Tracked Repos by Release Count")
+    plt.gca().invert_yaxis()
+    file = "chart.png"
     plt.tight_layout()
-
-    buf = BytesIO()
-    plt.savefig(buf, format="png")
-    buf.seek(0)
-    return buf
-
-# ---------------------------------
-# Command handling
-# ---------------------------------
+    plt.savefig(file)
+    plt.close()
+    return file
 
 def handle_command(chat_id, text):
-    repos = load_file(REPOS_FILE)
-    if not repos:
-        repos = load_repos_from_env()
-        save_file(repos, REPOS_FILE)
+    repos = load_repos()
+    history = load_history()
 
     if text == "/start":
-        send_msg(chat_id, "👋 Welcome! Send a GitHub repo link to track releases.\nUse /help to see all commands.")
+        send_msg(chat_id, "👋 Welcome! Send a GitHub repo (or list) to start tracking.\nUse /help to view available commands.")
     elif text == "/help":
-        help_text = (
-            "*🛠 Available Commands:*\n\n"
+        send_msg(chat_id,
+            "*Commands Available:*\n"
             "`/start` - Show welcome message\n"
-            "`/help` - List all available commands\n"
-            "`/list` - Show tracked repositories\n"
-            "`/releases` - Latest release for each repo\n"
-            "`/chart` - Chart of tracked repo activity\n"
-            "`/remove owner/repo` - Stop tracking a repo\n"
+            "`/help` - Show this help\n"
+            "`/about` - About the bot\n"
+            "`/ping` - Check bot status\n"
+            "`/list` - View tracked repos\n"
+            "`/releases` - Show latest release tags\n"
+            "`/chart` - View bar chart of release activity\n"
             "`/clearall` - Remove all tracked repos\n"
-            "`/ping` - Check if bot is alive\n"
-            "`/about` - Bot and dev info"
+            "`/remove owner/repo` - Remove a specific repo"
         )
-        send_msg(chat_id, help_text)
     elif text == "/about":
-        send_msg(chat_id, "🤖 *I'm Thor — GitHub Release Notifier Bot!*\n\nBuilt by @yourusername using Python. I track repositories and notify you of new releases.")
+        send_msg(chat_id, "🤖 *Im-Thor*: GitHub release tracker bot.\nTracks releases, sends updates, charts, and inline downloads.")
     elif text == "/ping":
-        send_msg(chat_id, "🏓 Pong!")
-    elif text == "/clearall":
-        save_file({}, REPOS_FILE)
-        send_msg(chat_id, "🧹 Cleared all tracked repositories.")
+        send_msg(chat_id, "🏓 Pong! Bot is alive.")
     elif text == "/list":
         if repos:
             lines = [f"🔹 `{r}`" for r in repos.keys()]
@@ -156,50 +107,44 @@ def handle_command(chat_id, text):
             send_msg(chat_id, "📭 No repositories are being tracked.")
     elif text == "/releases":
         if repos:
-            lines = [f"📦 `{r}` → `{v}`" for r, v in repos.items()]
+            lines = [f"📦 `{r}` → `{v}`" if v else f"📦 `{r}` → _none yet_" for r, v in repos.items()]
             send_msg(chat_id, "*Latest Releases:*\n" + "\n".join(lines))
         else:
-            send_msg(chat_id, "📭 No tracked repositories.")
+            send_msg(chat_id, "📭 No repositories are being tracked.")
     elif text == "/chart":
-        chart = draw_chart(repos)
+        chart = create_chart(history)
         if chart:
-            send_photo(chat_id, chart, caption="📈 Release History")
+            with open(chart, "rb") as f:
+                requests.post(f"{API}/sendPhoto", files={"photo": f}, data={"chat_id": chat_id})
         else:
-            send_msg(chat_id, "📉 No data available for chart.")
+            send_msg(chat_id, "📉 Not enough data to generate chart.")
+    elif text == "/clearall":
+        save_repos({})
+        save_history({})
+        send_msg(chat_id, "🧹 All tracked repositories cleared.")
     elif text.startswith("/remove"):
-        args = text.split()
-        if len(args) != 2:
-            send_msg(chat_id, "❌ Usage: `/remove owner/repo`")
-            return
-        repo = args[1]
-        if repo in repos:
-            del repos[repo]
-            save_file(repos, REPOS_FILE)
-            send_msg(chat_id, f"🗑️ Removed `{repo}` from tracking.")
+        parts = text.split()
+        if len(parts) == 2 and parts[1] in repos:
+            del repos[parts[1]]
+            save_repos(repos)
+            history.pop(parts[1], None)
+            save_history(history)
+            send_msg(chat_id, f"🗑️ Removed `{parts[1]}` from tracking.")
         else:
-            send_msg(chat_id, "❌ That repo isn’t being tracked.")
-
-# ---------------------------------
-# Bot main loop
-# ---------------------------------
+            send_msg(chat_id, "❌ Usage: `/remove owner/repo`")
 
 def main():
     offset = None
-    repos = load_file(REPOS_FILE)
-    if not repos:
-        repos = load_repos_from_env()
-        save_file(repos, REPOS_FILE)
 
     while True:
-        updates = get_updates(offset)
-        for upd in updates:
+        for upd in get_updates(offset):
             offset = upd["update_id"] + 1
 
             if "message" in upd:
                 msg = upd["message"]
                 chat_id = msg["chat"]["id"]
                 uid = msg["from"]["id"]
-                text = msg.get("text", "")
+                text = msg.get("text", "").strip()
                 msg_id = msg["message_id"]
 
                 if uid != OWNER_ID:
@@ -210,55 +155,30 @@ def main():
                     handle_command(chat_id, text)
                     continue
 
-                repo = parse_repo(text)
-                if repo:
-                    PENDING[chat_id] = (repo, msg_id)
+                # Auto parse multiple repos from message
+                new_repos = parse_repos(text)
+                repos = load_repos()
+                history = load_history()
+                added = 0
+
+                for repo in new_repos:
+                    if repo not in repos:
+                        rel = get_latest(repo)
+                        if rel and "tag_name" in rel:
+                            repos[repo] = rel["tag_name"]
+                            history.setdefault(repo, []).append(rel["tag_name"])
+                            added += 1
+
+                save_repos(repos)
+                save_history(history)
+
+                if added > 0:
                     send_msg(chat_id,
-                        f"🧐 You sent: `{repo}`\nTrack releases?",
-                        reply_to=msg_id,
-                        buttons=[
-                            [{"text": "✅ Yes", "callback_data": "confirm"}],
-                            [{"text": "❌ No", "callback_data": "cancel"}]
-                        ]
-                    )
+                        f"✅ Added *{added} new repos* to tracking.\n📊 Total now: *{len(repos)}*")
                 else:
-                    send_msg(chat_id, "❌ Please send a valid GitHub repo link.")
-
-            if "callback_query" in upd:
-                cb = upd["callback_query"]
-                uid = cb["from"]["id"]
-                cid = cb["message"]["chat"]["id"]
-                cb_mid = cb["message"]["message_id"]
-                data = cb["data"]
-
-                if uid != OWNER_ID:
-                    send_msg(cid, "⛔ Not authorized.")
-                    continue
-
-                if cid not in PENDING:
-                    send_msg(cid, "❌ No repo pending.")
-                    continue
-
-                repo, original_msg_id = PENDING.pop(cid)
-
-                if data == "confirm":
-                    rel = safe_get(f"https://api.github.com/repos/{repo}/releases/latest")
-                    if rel and "tag_name" in rel:
-                        repos[repo] = rel["tag_name"]
-                        save_file(repos, REPOS_FILE)
-                        send_msg(cid, f"✅ Now tracking `{repo}`.")
-                    else:
-                        send_msg(cid, f"❌ Could not fetch latest release.")
-                else:
-                    send_msg(cid, "❌ Cancelled.")
-
-                delete_msg(cid, original_msg_id)
-                delete_msg(cid, cb_mid)
+                    send_msg(chat_id, "📭 No new valid repos found or all already tracked.")
 
         time.sleep(2)
 
 if __name__ == "__main__":
-    try:
-        main()
-    except Exception as e:
-        print(f"[🔥 Bot crashed] {e}")
+    main()
