@@ -1,5 +1,3 @@
-# main.py
-
 import os, requests, json, time
 from io import BytesIO
 import matplotlib.pyplot as plt
@@ -11,33 +9,57 @@ REPOS_FILE = "repos.json"
 HISTORY_FILE = "history.json"
 PENDING = {}
 
+def safe_get(url, timeout=10):
+    try:
+        r = requests.get(url, timeout=timeout)
+        if r.status_code == 200:
+            return r.json()
+        else:
+            print(f"[HTTP Error] {url} → {r.status_code}")
+    except Exception as e:
+        print(f"[GET FAILED] {url} → {e}")
+    return None
+
 def send_msg(chat_id, text, reply_to=None, buttons=None):
-    data = {
-        "chat_id": chat_id,
-        "text": text,
-        "parse_mode": "Markdown",
-        "disable_web_page_preview": True
-    }
-    if reply_to: data["reply_to_message_id"] = reply_to
-    if buttons: data["reply_markup"] = {"inline_keyboard": buttons}
-    return requests.post(f"{API}/sendMessage", json=data, timeout=5).json()
+    try:
+        data = {
+            "chat_id": chat_id,
+            "text": text,
+            "parse_mode": "Markdown",
+            "disable_web_page_preview": True
+        }
+        if reply_to: data["reply_to_message_id"] = reply_to
+        if buttons: data["reply_markup"] = {"inline_keyboard": buttons}
+        return requests.post(f"{API}/sendMessage", json=data, timeout=10).json()
+    except Exception as e:
+        print(f"[SEND MSG ERROR] {e}")
 
 def send_photo(chat_id, image_bytes, caption=None):
-    files = {"photo": ("chart.png", image_bytes)}
-    data = {"chat_id": chat_id}
-    if caption:
-        data["caption"] = caption
-    requests.post(f"{API}/sendPhoto", data=data, files=files, timeout=10)
+    try:
+        files = {"photo": ("chart.png", image_bytes)}
+        data = {"chat_id": chat_id}
+        if caption:
+            data["caption"] = caption
+        requests.post(f"{API}/sendPhoto", data=data, files=files, timeout=20)
+    except Exception as e:
+        print(f"[SEND PHOTO ERROR] {e}")
 
 def delete_msg(chat_id, msg_id):
-    requests.post(f"{API}/deleteMessage", json={
-        "chat_id": chat_id,
-        "message_id": msg_id
-    }, timeout=5)
+    try:
+        requests.post(f"{API}/deleteMessage", json={
+            "chat_id": chat_id,
+            "message_id": msg_id
+        }, timeout=5)
+    except:
+        pass
 
 def get_updates(offset=None):
-    params = {"timeout": 30, "offset": offset} if offset else {"timeout": 30}
-    return requests.get(f"{API}/getUpdates", params=params, timeout=5).json().get("result", [])
+    try:
+        params = {"timeout": 30, "offset": offset} if offset else {"timeout": 30}
+        return requests.get(f"{API}/getUpdates", params=params, timeout=40).json().get("result", [])
+    except Exception as e:
+        print(f"[UPDATES ERROR] {e}")
+        return []
 
 def parse_repo(text):
     if "github.com/" in text:
@@ -45,13 +67,6 @@ def parse_repo(text):
         if len(parts) >= 2:
             return f"{parts[0]}/{parts[1].split()[0]}"
     return None
-
-def get_latest(repo):
-    try:
-        r = requests.get(f"https://api.github.com/repos/{repo}/releases/latest", timeout=5)
-        return r.json() if r.status_code == 200 else None
-    except:
-        return None
 
 def load_file(path):
     return json.load(open(path)) if os.path.exists(path) else {}
@@ -85,6 +100,7 @@ def draw_chart(repos):
 
 def handle_command(chat_id, text):
     repos = load_file(REPOS_FILE)
+
     if text == "/start":
         send_msg(chat_id, "👋 Welcome! Send a GitHub repo link to track new releases.\nUse /list to see tracked repos, /remove to remove one.")
     elif text == "/list":
@@ -123,7 +139,8 @@ def main():
     repos = load_file(REPOS_FILE)
 
     while True:
-        for upd in get_updates(offset):
+        updates = get_updates(offset)
+        for upd in updates:
             offset = upd["update_id"] + 1
 
             if "message" in upd:
@@ -173,7 +190,7 @@ def main():
                 repo, original_msg_id = PENDING.pop(cid)
 
                 if data == "confirm":
-                    rel = get_latest(repo)
+                    rel = safe_get(f"https://api.github.com/repos/{repo}/releases/latest")
                     if rel and "tag_name" in rel:
                         repos[repo] = rel["tag_name"]
                         save_file(repos, REPOS_FILE)
@@ -189,4 +206,7 @@ def main():
         time.sleep(2)
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        print(f"[🔥 Bot crashed] {e}")
