@@ -9,6 +9,10 @@ REPOS_FILE = "repos.json"
 HISTORY_FILE = "history.json"
 PENDING = {}
 
+# ---------------------------------
+# Safe functions
+# ---------------------------------
+
 def safe_get(url, timeout=10):
     try:
         r = requests.get(url, timeout=timeout)
@@ -61,6 +65,10 @@ def get_updates(offset=None):
         print(f"[UPDATES ERROR] {e}")
         return []
 
+# ---------------------------------
+# Repo storage and visualization
+# ---------------------------------
+
 def parse_repo(text):
     if "github.com/" in text:
         parts = text.split("github.com/")[1].split("/")
@@ -74,6 +82,15 @@ def load_file(path):
 def save_file(data, path):
     with open(path, "w") as f:
         json.dump(data, f, indent=2)
+
+def load_repos_from_env():
+    raw = os.getenv("TRACKED_REPOS", "")
+    repos = {}
+    for r in raw.split(","):
+        r = r.strip()
+        if r:
+            repos[r] = ""
+    return repos
 
 def draw_chart(repos):
     history = load_file(HISTORY_FILE)
@@ -98,11 +115,39 @@ def draw_chart(repos):
     buf.seek(0)
     return buf
 
+# ---------------------------------
+# Command handling
+# ---------------------------------
+
 def handle_command(chat_id, text):
     repos = load_file(REPOS_FILE)
+    if not repos:
+        repos = load_repos_from_env()
+        save_file(repos, REPOS_FILE)
 
     if text == "/start":
-        send_msg(chat_id, "👋 Welcome! Send a GitHub repo link to track new releases.\nUse /list to see tracked repos, /remove to remove one.")
+        send_msg(chat_id, "👋 Welcome! Send a GitHub repo link to track releases.\nUse /help to see all commands.")
+    elif text == "/help":
+        help_text = (
+            "*🛠 Available Commands:*\n\n"
+            "`/start` - Show welcome message\n"
+            "`/help` - List all available commands\n"
+            "`/list` - Show tracked repositories\n"
+            "`/releases` - Latest release for each repo\n"
+            "`/chart` - Chart of tracked repo activity\n"
+            "`/remove owner/repo` - Stop tracking a repo\n"
+            "`/clearall` - Remove all tracked repos\n"
+            "`/ping` - Check if bot is alive\n"
+            "`/about` - Bot and dev info"
+        )
+        send_msg(chat_id, help_text)
+    elif text == "/about":
+        send_msg(chat_id, "🤖 *I'm Thor — GitHub Release Notifier Bot!*\n\nBuilt by @yourusername using Python. I track repositories and notify you of new releases.")
+    elif text == "/ping":
+        send_msg(chat_id, "🏓 Pong!")
+    elif text == "/clearall":
+        save_file({}, REPOS_FILE)
+        send_msg(chat_id, "🧹 Cleared all tracked repositories.")
     elif text == "/list":
         if repos:
             lines = [f"🔹 `{r}`" for r in repos.keys()]
@@ -134,9 +179,16 @@ def handle_command(chat_id, text):
         else:
             send_msg(chat_id, "❌ That repo isn’t being tracked.")
 
+# ---------------------------------
+# Bot main loop
+# ---------------------------------
+
 def main():
     offset = None
     repos = load_file(REPOS_FILE)
+    if not repos:
+        repos = load_repos_from_env()
+        save_file(repos, REPOS_FILE)
 
     while True:
         updates = get_updates(offset)
