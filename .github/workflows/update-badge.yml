@@ -1,0 +1,54 @@
+name: Update Tracked Repo Badge
+
+on:
+  push:
+    paths:
+      - repos.json
+  workflow_dispatch:
+
+jobs:
+  update-badge:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v3
+
+      - name: 🔢 Count Tracked Repos and Generate Badge
+        run: |
+          count=$(jq 'keys | length' repos.json)
+          echo "Repo count: $count"
+          mkdir -p badges
+
+          # Create SVG badge file
+          cat <<EOF > badges/tracked_count_badge.svg
+          <svg xmlns="http://www.w3.org/2000/svg" width="140" height="20">
+            <linearGradient id="b" x2="0" y2="100%">
+              <stop offset="0" stop-color="#bbb" stop-opacity=".1"/>
+              <stop offset="1" stop-opacity=".1"/>
+            </linearGradient>
+            <mask id="a">
+              <rect width="140" height="20" rx="3" fill="#fff"/>
+            </mask>
+            <g mask="url(#a)">
+              <rect width="90" height="20" fill="#555"/>
+              <rect x="90" width="50" height="20" fill="#007ec6"/>
+              <rect width="140" height="20" fill="url(#b)"/>
+            </g>
+            <g fill="#fff" text-anchor="middle" font-family="Verdana" font-size="11">
+              <text x="45" y="15" fill="#010101" fill-opacity=".3">Tracked Repos</text>
+              <text x="45" y="14">Tracked Repos</text>
+              <text x="115" y="15" fill="#010101" fill-opacity=".3">$count</text>
+              <text x="115" y="14">$count</text>
+            </g>
+          </svg>
+          EOF
+
+      - name: ✅ Commit and Push Badge
+        run: |
+          git config user.name "Im-Thor Bot"
+          git config user.email "bot@github.com"
+
+          git add badges/tracked_count_badge.svg
+          git commit -m "🔖 Update tracked repos badge"
+          git push
