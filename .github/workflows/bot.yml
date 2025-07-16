@@ -2,8 +2,8 @@ name: GitHub Release Tracker Bot
 
 on:
   schedule:
-    - cron: "*/10 * * * *"   # Runs every 10 minutes
-  workflow_dispatch:         # Allows manual trigger from GitHub UI
+    - cron: "*/10 * * * *"  # every 10 minutes
+  workflow_dispatch:
 
 jobs:
   check-releases:
@@ -30,3 +30,18 @@ jobs:
           echo "🔍 Checking for GitHub releases..."
           python check_releases.py
           echo "✅ Done."
+
+      - name: 📤 Commit and Push Updated JSON Files
+        if: success()
+        run: |
+          git config user.name "Im-Thor Bot"
+          git config user.email "bot@github.com"
+
+          git add repos.json history.json
+
+          if git diff --cached --quiet; then
+            echo "🟢 No changes to commit."
+          else
+            git commit -m "🔄 Auto-update repos and history [bot]"
+            git push
+          fi
