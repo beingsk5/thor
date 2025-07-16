@@ -2,7 +2,7 @@ name: GitHub Release Tracker Bot
 
 on:
   schedule:
-    - cron: "*/10 * * * *"  # every 10 minutes
+    - cron: "*/10 * * * *"
   workflow_dispatch:
 
 jobs:
@@ -25,26 +25,15 @@ jobs:
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHANNEL_ID: ${{ secrets.TELEGRAM_CHANNEL_ID }}
-          TRACKED_REPOS: ${{ secrets.TRACKED_REPOS }}
         run: |
           echo "🔍 Checking for GitHub releases..."
           python check_releases.py
           echo "✅ Done."
 
-      - name: 📤 Commit and Push Updated JSON Files
-        if: success()
+      - name: 📝 Commit updated JSON and badge
         run: |
-          git config user.name "Im-Thor Bot"
-          git config user.email "bot@github.com"
-
-          # Safely add files only if they exist
-          if [ -f repos.json ]; then git add repos.json; fi
-          if [ -f history.json ]; then git add history.json; fi
-
-          # Check if anything changed
-          if git diff --cached --quiet; then
-            echo "🟢 No changes to commit."
-          else
-            git commit -m "🔄 Auto-update repos and history [bot]"
-            git push
-          fi
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add repos.json history.json badges/tracked_count_badge.svg || true
+          git commit -m "🔄 Auto update tracked repos and badge" || echo "No changes"
+          git push https://x-access-token:${{ secrets.GH_PUSH_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
