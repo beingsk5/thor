@@ -37,8 +37,11 @@ jobs:
           git config user.name "Im-Thor Bot"
           git config user.email "bot@github.com"
 
-          git add repos.json history.json
+          # Safely add files only if they exist
+          if [ -f repos.json ]; then git add repos.json; fi
+          if [ -f history.json ]; then git add history.json; fi
 
+          # Check if anything changed
           if git diff --cached --quiet; then
             echo "🟢 No changes to commit."
           else
