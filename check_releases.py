@@ -8,102 +8,69 @@ TELEGRAM_API = f"https://api.telegram.org/bot{TOKEN}"
 REPOS_FILE = "repos.json"
 HISTORY_FILE = "history.json"
 
-def send_channel_message(text, buttons=None):
-    try:
-        data = {
-            "chat_id": CHANNEL_ID,
-            "text": text,
-            "parse_mode": "Markdown",
-            "disable_web_page_preview": True
-        }
-        if buttons:
-            data["reply_markup"] = {"inline_keyboard": buttons}
-        requests.post(f"{TELEGRAM_API}/sendMessage", json=data, timeout=15)
-    except Exception as e:
-        print(f"[SEND MSG ERROR] {e}")
+def send_channel_message(text):
+    requests.post(f"{TELEGRAM_API}/sendMessage", json={
+        "chat_id": CHANNEL_ID,
+        "text": text,
+        "parse_mode": "Markdown"
+    })
 
-def send_document(file_url, filename):
-    try:
-        file = requests.get(file_url, timeout=10)
-        if file.status_code == 200 and len(file.content) < 45 * 1024 * 1024:
-            files = {"document": (filename, file.content)}
-            data = {"chat_id": CHANNEL_ID, "caption": f"💾 `{filename}`", "parse_mode": "Markdown"}
-            requests.post(f"{TELEGRAM_API}/sendDocument", files=files, data=data, timeout=30)
-    except Exception as e:
-        print(f"[UPLOAD ERROR] {filename} → {e}")
+def get_latest_release(repo):
+    url = f"https://api.github.com/repos/{repo}/releases/latest"
+    r = requests.get(url)
+    return r.json() if r.status_code == 200 else None
 
-def safe_get(url, timeout=10):
-    try:
-        r = requests.get(url, timeout=timeout)
-        if r.status_code == 200:
-            return r.json()
-        else:
-            print(f"[HTTP Error] {url} → {r.status_code}")
-    except Exception as e:
-        print(f"[Request Failed] {url} → {e}")
-    return None
-
-def load_file(path):
-    return json.load(open(path)) if os.path.exists(path) else {}
-
-def save_file(data, path):
-    with open(path, "w") as f:
-        json.dump(data, f, indent=2)
-
-def load_repos_from_env():
-    raw = os.getenv("TRACKED_REPOS", "")
-    repos = {}
-    for r in raw.split(","):
-        r = r.strip()
-        if r:
-            repos[r] = ""
-    return repos
+def update_badge(count):
+    badge_svg = f'''
+<svg xmlns="http://www.w3.org/2000/svg" width="140" height="20">
+  <linearGradient id="a" x2="0" y2="100%">
+    <stop offset="0" stop-color="#bbb" stop-opacity=".1"/>
+    <stop offset="1" stop-opacity=".1"/>
+  </linearGradient>
+  <rect rx="3" width="140" height="20" fill="#555"/>
+  <rect rx="3" x="80" width="60" height="20" fill="#4c1"/>
+  <path fill="#4c1" d="M80 0h4v20h-4z"/>
+  <rect rx="3" width="140" height="20" fill="url(#a)"/>
+  <g fill="#fff" font-family="Verdana" font-size="11">
+    <text x="6" y="14">Tracked Repos</text>
+    <text x="90" y="14">{count}</text>
+  </g>
+</svg>
+'''
+    os.makedirs("badges", exist_ok=True)
+    with open("badges/tracked_count_badge.svg", "w") as f:
+        f.write(badge_svg)
 
 def main():
-    repos = load_file(REPOS_FILE)
-    if not repos:
-        repos = load_repos_from_env()
-        save_file(repos, REPOS_FILE)
+    if not os.path.exists(REPOS_FILE):
+        print("No repos to check.")
+        return
 
-    history = load_file(HISTORY_FILE)
+    repos = json.load(open(REPOS_FILE))
+    history = json.load(open(HISTORY_FILE)) if os.path.exists(HISTORY_FILE) else {}
+
     updated = False
 
     for repo, last_tag in repos.items():
-        latest = safe_get(f"https://api.github.com/repos/{repo}/releases/latest")
+        latest = get_latest_release(repo)
         if not latest or "tag_name" not in latest:
             continue
 
-        tag = latest["tag_name"]
-        if tag != last_tag:
-            name = latest.get("name", tag)
-            html_url = latest.get("html_url", "")
-            text = f"🚀 *New Release for* `{repo}`\n\n*{name}* (`{tag}`)"
-
-            buttons = []
-            if latest.get("assets"):
-                for asset in latest["assets"]:
-                    url = asset["browser_download_url"]
-                    name = asset["name"]
-                    size = asset["size"]
-
-                    if size < 45 * 1024 * 1024:
-                        send_document(url, name)
-                    else:
-                        buttons.append([{"text": f"⬇️ {name}", "url": url}])
-
-            buttons.append([{"text": "🌐 View on GitHub", "url": html_url}])
-            send_channel_message(text, buttons=buttons)
-
-            repos[repo] = tag
-            history.setdefault(repo, []).append(tag)
+        if latest["tag_name"] != last_tag:
+            send_channel_message(
+                f"🚀 *New Release for {repo}*\n\n*{latest['name']}* (`{latest['tag_name']}`)\n{latest['html_url']}"
+            )
+            repos[repo] = latest["tag_name"]
+            history.setdefault(repo, []).append(latest["tag_name"])
             updated = True
 
     if updated:
-        save_file(repos, REPOS_FILE)
-        save_file(history, HISTORY_FILE)
+        with open(REPOS_FILE, "w") as f:
+            json.dump(repos, f, indent=2)
+        with open(HISTORY_FILE, "w") as f:
+            json.dump(history, f, indent=2)
+
+    update_badge(len(repos))
 
 if __name__ == "__main__":
-    try:
-        main()
-    except Exception as e:
-        print(f"[🔥 check_releases.py crashed] {e}")
+    main()
