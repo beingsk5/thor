@@ -1,5 +1,3 @@
-# check_releases.py
-
 import requests
 import os
 import json
@@ -9,42 +7,41 @@ CHANNEL_ID = os.getenv("TELEGRAM_CHANNEL_ID")
 TELEGRAM_API = f"https://api.telegram.org/bot{TOKEN}"
 REPOS_FILE = "repos.json"
 HISTORY_FILE = "history.json"
-TELEGRAM_FILE_LIMIT_MB = 50
 
 def send_channel_message(text, buttons=None):
-    payload = {
-        "chat_id": CHANNEL_ID,
-        "text": text,
-        "parse_mode": "Markdown",
-        "disable_web_page_preview": True
-    }
-    if buttons:
-        payload["reply_markup"] = {"inline_keyboard": buttons}
-
     try:
-        requests.post(f"{TELEGRAM_API}/sendMessage", json=payload, timeout=10)
+        data = {
+            "chat_id": CHANNEL_ID,
+            "text": text,
+            "parse_mode": "Markdown",
+            "disable_web_page_preview": True
+        }
+        if buttons:
+            data["reply_markup"] = {"inline_keyboard": buttons}
+        requests.post(f"{TELEGRAM_API}/sendMessage", json=data, timeout=15)
     except Exception as e:
-        print(f"[Telegram Error] {e}")
+        print(f"[SEND MSG ERROR] {e}")
 
-def send_telegram_file(url, filename):
+def send_document(file_url, filename):
     try:
-        file_bytes = requests.get(url, timeout=20).content
-        if len(file_bytes) > TELEGRAM_FILE_LIMIT_MB * 1024 * 1024:
-            return False
-        files = {'document': (filename, file_bytes)}
-        data = {'chat_id': CHANNEL_ID}
-        requests.post(f"{TELEGRAM_API}/sendDocument", data=data, files=files, timeout=30)
-        return True
-    except:
-        return False
+        file = requests.get(file_url, timeout=10)
+        if file.status_code == 200 and len(file.content) < 45 * 1024 * 1024:
+            files = {"document": (filename, file.content)}
+            data = {"chat_id": CHANNEL_ID, "caption": f"💾 `{filename}`", "parse_mode": "Markdown"}
+            requests.post(f"{TELEGRAM_API}/sendDocument", files=files, data=data, timeout=30)
+    except Exception as e:
+        print(f"[UPLOAD ERROR] {filename} → {e}")
 
-def get_latest_release(repo):
+def safe_get(url, timeout=10):
     try:
-        url = f"https://api.github.com/repos/{repo}/releases/latest"
-        r = requests.get(url, timeout=10)
-        return r.json() if r.status_code == 200 else None
-    except:
-        return None
+        r = requests.get(url, timeout=timeout)
+        if r.status_code == 200:
+            return r.json()
+        else:
+            print(f"[HTTP Error] {url} → {r.status_code}")
+    except Exception as e:
+        print(f"[Request Failed] {url} → {e}")
+    return None
 
 def load_file(path):
     return json.load(open(path)) if os.path.exists(path) else {}
@@ -53,39 +50,60 @@ def save_file(data, path):
     with open(path, "w") as f:
         json.dump(data, f, indent=2)
 
+def load_repos_from_env():
+    raw = os.getenv("TRACKED_REPOS", "")
+    repos = {}
+    for r in raw.split(","):
+        r = r.strip()
+        if r:
+            repos[r] = ""
+    return repos
+
 def main():
     repos = load_file(REPOS_FILE)
+    if not repos:
+        repos = load_repos_from_env()
+        save_file(repos, REPOS_FILE)
+
     history = load_file(HISTORY_FILE)
     updated = False
 
     for repo, last_tag in repos.items():
-        latest = get_latest_release(repo)
+        latest = safe_get(f"https://api.github.com/repos/{repo}/releases/latest")
         if not latest or "tag_name" not in latest:
             continue
 
-        if latest["tag_name"] != last_tag:
-            msg = f"🚀 *New Release for `{repo}`!*\n*{latest.get('name', 'Unnamed')}* (`{latest['tag_name']}`)"
-            assets = latest.get("assets", [])
+        tag = latest["tag_name"]
+        if tag != last_tag:
+            name = latest.get("name", tag)
+            html_url = latest.get("html_url", "")
+            text = f"🚀 *New Release for* `{repo}`\n\n*{name}* (`{tag}`)"
+
             buttons = []
+            if latest.get("assets"):
+                for asset in latest["assets"]:
+                    url = asset["browser_download_url"]
+                    name = asset["name"]
+                    size = asset["size"]
 
-            for asset in assets:
-                name = asset.get("name")
-                url = asset.get("browser_download_url")
+                    if size < 45 * 1024 * 1024:
+                        send_document(url, name)
+                    else:
+                        buttons.append([{"text": f"⬇️ {name}", "url": url}])
 
-                uploaded = send_telegram_file(url, name)
-                if not uploaded:
-                    buttons.append([{"text": f"🔽 {name}", "url": url}])
+            buttons.append([{"text": "🌐 View on GitHub", "url": html_url}])
+            send_channel_message(text, buttons=buttons)
 
-            send_channel_message(msg, buttons if buttons else None)
-            repos[repo] = latest["tag_name"]
-
-            history.setdefault(repo, []).append(latest["tag_name"])
+            repos[repo] = tag
+            history.setdefault(repo, []).append(tag)
             updated = True
 
     if updated:
         save_file(repos, REPOS_FILE)
         save_file(history, HISTORY_FILE)
-        print("[🔁] Updated repos and history.")
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        print(f"[🔥 check_releases.py crashed] {e}")
