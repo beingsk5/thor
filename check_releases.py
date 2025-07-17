@@ -1,76 +1,75 @@
-import requests
+# check_releases.py
 import os
 import json
+import requests
+from datetime import datetime
 
-TOKEN = os.getenv("TELEGRAM_TOKEN")
-CHANNEL_ID = os.getenv("TELEGRAM_CHANNEL_ID")
-TELEGRAM_API = f"https://api.telegram.org/bot{TOKEN}"
-REPOS_FILE = "repos.json"
+REPO_FILE = "repos.json"
 HISTORY_FILE = "history.json"
+BADGE_FILE = "badges/tracked_count_badge.svg"
 
-def send_channel_message(text):
-    requests.post(f"{TELEGRAM_API}/sendMessage", json={
-        "chat_id": CHANNEL_ID,
-        "text": text,
-        "parse_mode": "Markdown"
-    })
+GITHUB_API = "https://api.github.com/repos/"
 
-def get_latest_release(repo):
-    url = f"https://api.github.com/repos/{repo}/releases/latest"
-    r = requests.get(url)
-    return r.json() if r.status_code == 200 else None
+def load_json(file, fallback):
+    if os.path.exists(file):
+        with open(file, "r") as f:
+            return json.load(f)
+    return fallback
 
-def update_badge(count):
+def save_json(file, data):
+    with open(file, "w") as f:
+        json.dump(data, f, indent=2)
+
+def fetch_latest_release(repo):
+    url = f"{GITHUB_API}{repo}/releases/latest"
+    response = requests.get(url)
+    if response.status_code == 200:
+        return response.json()
+    return None
+
+def generate_badge(count):
     badge_svg = f'''
-<svg xmlns="http://www.w3.org/2000/svg" width="140" height="20">
-  <linearGradient id="a" x2="0" y2="100%">
+<svg xmlns="http://www.w3.org/2000/svg" width="180" height="20">
+  <linearGradient id="b" x2="0" y2="100%">
     <stop offset="0" stop-color="#bbb" stop-opacity=".1"/>
     <stop offset="1" stop-opacity=".1"/>
   </linearGradient>
-  <rect rx="3" width="140" height="20" fill="#555"/>
-  <rect rx="3" x="80" width="60" height="20" fill="#4c1"/>
-  <path fill="#4c1" d="M80 0h4v20h-4z"/>
-  <rect rx="3" width="140" height="20" fill="url(#a)"/>
-  <g fill="#fff" font-family="Verdana" font-size="11">
-    <text x="6" y="14">Tracked Repos</text>
-    <text x="90" y="14">{count}</text>
+  <mask id="a"><rect width="180" height="20" rx="3" fill="#fff"/></mask>
+  <g mask="url(#a)">
+    <rect width="120" height="20" fill="#555"/>
+    <rect x="120" width="60" height="20" fill="#4c1"/>
+    <rect width="180" height="20" fill="url(#b)"/>
+  </g>
+  <g fill="#fff" text-anchor="middle"
+     font-family="DejaVu Sans,Verdana,Geneva,sans-serif" font-size="11">
+    <text x="60" y="15" fill="#010101" fill-opacity=".3">Tracked Repos</text>
+    <text x="60" y="14">Tracked Repos</text>
+    <text x="150" y="15" fill="#010101" fill-opacity=".3">{count}</text>
+    <text x="150" y="14">{count}</text>
   </g>
 </svg>
 '''
     os.makedirs("badges", exist_ok=True)
-    with open("badges/tracked_count_badge.svg", "w") as f:
+    with open(BADGE_FILE, "w") as f:
         f.write(badge_svg)
 
 def main():
-    if not os.path.exists(REPOS_FILE):
-        print("No repos to check.")
-        return
+    repos = load_json(REPO_FILE, {"repos": []})
+    history = load_json(HISTORY_FILE, {})
 
-    repos = json.load(open(REPOS_FILE))
-    history = json.load(open(HISTORY_FILE)) if os.path.exists(HISTORY_FILE) else {}
+    for repo_entry in repos["repos"]:
+        repo = repo_entry["name"]
+        data = fetch_latest_release(repo)
+        if data and "tag_name" in data:
+            tag = data["tag_name"]
+            published = data.get("published_at", datetime.utcnow().isoformat())
+            if repo not in history:
+                history[repo] = []
+            if not any(r["tag_name"] == tag for r in history[repo]):
+                history[repo].insert(0, {"tag_name": tag, "published_at": published})
 
-    updated = False
-
-    for repo, last_tag in repos.items():
-        latest = get_latest_release(repo)
-        if not latest or "tag_name" not in latest:
-            continue
-
-        if latest["tag_name"] != last_tag:
-            send_channel_message(
-                f"🚀 *New Release for {repo}*\n\n*{latest['name']}* (`{latest['tag_name']}`)\n{latest['html_url']}"
-            )
-            repos[repo] = latest["tag_name"]
-            history.setdefault(repo, []).append(latest["tag_name"])
-            updated = True
-
-    if updated:
-        with open(REPOS_FILE, "w") as f:
-            json.dump(repos, f, indent=2)
-        with open(HISTORY_FILE, "w") as f:
-            json.dump(history, f, indent=2)
-
-    update_badge(len(repos))
+    save_json(HISTORY_FILE, history)
+    generate_badge(len(repos["repos"]))
 
 if __name__ == "__main__":
     main()
