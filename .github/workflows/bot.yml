@@ -2,7 +2,7 @@ name: GitHub Release Tracker Bot
 
 on:
   schedule:
-    - cron: "*/10 * * * *"
+    - cron: "*/10 * * * *"  # Every 10 minutes
   workflow_dispatch:
 
 jobs:
@@ -19,21 +19,13 @@ jobs:
           python-version: '3.11'
 
       - name: 📦 Install Dependencies
-        run: pip install requests matplotlib
+        run: pip install requests
 
       - name: 🚀 Run GitHub Release Checker
         env:
-          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHANNEL_ID: ${{ secrets.TELEGRAM_CHANNEL_ID }}
         run: |
           echo "🔍 Checking for GitHub releases..."
-          python check_releases.py
+          python main.py
           echo "✅ Done."
-
-      - name: 📝 Commit updated JSON and badge
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git add repos.json history.json badges/tracked_count_badge.svg || true
-          git commit -m "🔄 Auto update tracked repos and badge" || echo "No changes"
-          git push https://x-access-token:${{ secrets.GH_PUSH_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
