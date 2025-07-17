@@ -1,103 +1,121 @@
-# main.py
 import os
 import json
-import logging
-import requests
+import re
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
-from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+from telegram.ext import Application, CommandHandler, MessageHandler, CallbackContext, filters
+from datetime import datetime
 
 REPO_FILE = "repos.json"
 HISTORY_FILE = "history.json"
+DEFAULT_REPOS = os.getenv("TRACKED_REPOS", "")
 
-BOT_OWNER_ID = int(os.getenv("BOT_OWNER_ID", "0"))  # Set your Telegram ID in .env
+def load_json(path, fallback):
+    if not os.path.exists(path):
+        with open(path, "w") as f:
+            json.dump(fallback, f, indent=2)
+    with open(path) as f:
+        return json.load(f)
 
-logging.basicConfig(level=logging.INFO)
-
-def load_json(filename, fallback):
-    if os.path.exists(filename):
-        with open(filename, "r") as f:
-            return json.load(f)
-    return fallback
-
-def save_json(filename, data):
-    with open(filename, "w") as f:
+def save_json(path, data):
+    with open(path, "w") as f:
         json.dump(data, f, indent=2)
 
-def validate_repo_format(repo: str) -> bool:
-    parts = repo.strip().split("/")
-    return len(parts) == 2 and all(parts)
+def load_repos():
+    return load_json(REPO_FILE, DEFAULT_REPOS.split() if DEFAULT_REPOS else [])
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("👋 Hello! Send me a GitHub repo link or use /help")
+def load_history():
+    return load_json(HISTORY_FILE, {})
 
-async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def save_all(repos, history):
+    save_json(REPO_FILE, repos)
+    save_json(HISTORY_FILE, history)
+
+async def start(update: Update, context: CallbackContext):
+    await update.message.reply_text("👋 Welcome to GitHub Release Tracker Bot!")
+
+async def help_command(update: Update, context: CallbackContext):
     await update.message.reply_text(
-        "🧭 *GitHub Release Bot Commands:*\n"
-        "/add <repo_url or user/repo> - Track a new repo\n"
-        "/list - Show tracked repos\n"
+        "📖 *Available Commands:*\n"
+        "/start - Welcome message\n"
+        "/help - Show this help\n"
+        "/about - About the bot\n"
+        "/list - Show tracked repositories\n"
+        "/clearall - Remove all tracked repositories\n"
+        "/ping - Check if bot is alive\n"
         "/releases - Show recent releases\n"
-        "/chart - Repo activity chart\n"
-        "/ping - Check bot status\n"
-        "/about - Info about this bot\n"
-        "/clearall - Clear all (admin only)",
+        "/chart - Show chart of tracked repos",
         parse_mode="Markdown"
     )
 
-async def ping(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("🏓 Pong!")
+async def about_command(update: Update, context: CallbackContext):
+    await update.message.reply_text("🤖 GitHub Release Tracker Bot by @beingsk\nOpen-source and customizable.")
 
-async def about(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("🤖 GitHub Release Tracker Bot by beingsk\n🔗 https://github.com/beingsk5/thor")
+async def ping_command(update: Update, context: CallbackContext):
+    await update.message.reply_text("🏓 Pong! Bot is active.")
 
-async def list_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    data = load_json(REPO_FILE, {"repos": []})
-    if not data["repos"]:
-        await update.message.reply_text("❌ No repositories are being tracked.")
-    else:
-        msg = "📦 *Tracked Repositories:*\n" + "\n".join(f"- `{r['name']}`" for r in data["repos"])
-        await update.message.reply_text(msg, parse_mode="Markdown")
+async def clearall_command(update: Update, context: CallbackContext):
+    save_all([], {})
+    await update.message.reply_text("🧹 All tracked repositories cleared.")
 
-async def clearall(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.effective_user.id != BOT_OWNER_ID:
-        await update.message.reply_text("🚫 Only the bot owner can clear all.")
-        return
-    save_json(REPO_FILE, {"repos": []})
-    save_json(HISTORY_FILE, {})
-    await update.message.reply_text("✅ All tracked repositories cleared.")
-
-async def add_repo(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    msg = update.message.text.strip()
-    repos = [r.strip() for r in msg.split() if "/" in r]
-
+async def list_command(update: Update, context: CallbackContext):
+    repos = load_repos()
     if not repos:
-        await update.message.reply_text("⚠️ Please provide valid GitHub repos (username/repo)")
+        await update.message.reply_text("📭 No repositories are being tracked.")
+    else:
+        reply = "📦 *Currently Tracked Repositories:*\n" + "\n".join(f"🔹 `{r}`" for r in repos)
+        await update.message.reply_text(reply, parse_mode="Markdown")
+
+async def releases_command(update: Update, context: CallbackContext):
+    history = load_history()
+    if not history:
+        await update.message.reply_text("📭 No releases found in history.")
         return
+    reply = "🕘 *Latest Releases:*\n"
+    for repo, data in history.items():
+        reply += f"🔹 `{repo}` - [{data['tag']}]({data['url']})\n"
+    await update.message.reply_text(reply, parse_mode="Markdown", disable_web_page_preview=True)
 
-    current = load_json(REPO_FILE, {"repos": []})
-    existing = set(r["name"] for r in current["repos"])
-    added = 0
+async def chart_command(update: Update, context: CallbackContext):
+    chart_url = "https://raw.githubusercontent.com/beingsk5/thor/main/badges/tracked_count_badge.svg"
+    await update.message.reply_photo(photo=chart_url, caption="📊 Current Tracked Repository Count")
 
-    for repo in repos:
-        repo = repo.replace("https://github.com/", "").strip()
-        if validate_repo_format(repo) and repo not in existing:
-            current["repos"].append({"name": repo})
-            added += 1
+async def handle_message(update: Update, context: CallbackContext):
+    text = update.message.text.strip()
+    repos = load_repos()
+    added = []
 
-    save_json(REPO_FILE, current)
-    await update.message.reply_text(f"✅ Added {added} new repositories.\n📦 Total: {len(current['repos'])}")
+    # Extract GitHub repos
+    repo_names = re.findall(r"(?:https?://github\.com/)?([a-zA-Z0-9_.-]+/[a-zA-Z0-9_.-]+)", text)
+    for repo in repo_names:
+        if repo not in repos:
+            repos.append(repo)
+            added.append(repo)
+
+    save_all(repos, load_history())
+
+    if added:
+        await update.message.reply_text(
+            f"✅ Added {len(added)} new repo(s) to tracking.\n📦 Total: {len(repos)}"
+        )
+    else:
+        await update.message.reply_text("ℹ️ No new repositories were added.")
 
 def main():
-    token = os.getenv("BOT_TOKEN")
+    token = os.getenv("TELEGRAM_TOKEN")
     app = Application.builder().token(token).build()
 
+    # Command handlers
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("help", help_command))
-    app.add_handler(CommandHandler("ping", ping))
-    app.add_handler(CommandHandler("about", about))
+    app.add_handler(CommandHandler("about", about_command))
+    app.add_handler(CommandHandler("ping", ping_command))
     app.add_handler(CommandHandler("list", list_command))
-    app.add_handler(CommandHandler("clearall", clearall))
-    app.add_handler(CommandHandler("add", add_repo))
-    app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), add_repo))
+    app.add_handler(CommandHandler("clearall", clearall_command))
+    app.add_handler(CommandHandler("releases", releases_command))
+    app.add_handler(CommandHandler("chart", chart_command))
+
+    # Fallback handler
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
     app.run_polling()
 
