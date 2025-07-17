@@ -1,2 +1,3 @@
 requests
 matplotlib
+python-telegram-bot
