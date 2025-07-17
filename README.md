@@ -1,27 +1,43 @@
-<h1 align="center">⚡ Im-Thor — GitHub Release Tracker Bot</h1>
+# ⚡ Thor: GitHub Release Tracker Bot
 
-<p align="center">
-  <img src="https://img.shields.io/github/actions/workflow/status/beingsk5/thor/bot.yml?label=Tracker%20Bot&logo=githubactions&style=for-the-badge" />
-  <img src="badges/tracked_count_badge.svg" />
-  <img src="https://img.shields.io/github/languages/code-size/beingsk5/thor?color=blueviolet&style=for-the-badge&logo=github" />
-</p>
-
-<p align="center">
-  <b>A powerful Telegram bot that tracks GitHub repositories and notifies release updates with downloadable assets, visual charts, and live sync.</b>
-</p>
+> 🔔 Automatically tracks GitHub repositories and notifies your Telegram channel on new releases.
 
 ---
 
-## 🔥 Features
+### 🌟 Features
 
-✅ Track multiple GitHub repositories in real-time  
-✅ Instant Telegram notifications for new releases  
-✅ Smart download buttons + direct file uploads (<50MB)  
-✅ `/releases` to view latest tracked tags  
-✅ `/chart` to view release trends in bar chart  
-✅ `/list`, `/remove`, `/clearall`, `/about`, `/help`  
-✅ Auto-persist repos via `repos.json` + `history.json`  
-✅ GitHub Actions auto-check + auto-commit  
-✅ 🔖 Live badge showing total tracked repos
+- 📦 **Tracks GitHub Repositories**
+- 📢 **Sends Release Updates to Telegram**
+- 📊 **Auto-generated Chart and Repo Count Badge**
+- 🧠 **Intelligent Parsing (auto-detects `user/repo` or full URLs)**
+- 🔧 **Easy Commands: `/add`, `/clearall`, `/help`, `/about`, `/chart`, `/releases`**
+- ♻️ **Survives Bot Restarts and Updates**
 
 ---
+
+### 📊 Tracked Repositories
+![Tracked Repos](badges/tracked_count_badge.svg)
+
+---
+
+### 🔧 Bot Commands (in Telegram)
+/add `<repo>` – Add repository to track  
+/clearall – Clear all tracked repositories  
+/ping – Check if bot is alive  
+/help – Get usage info  
+/about – Info about this bot  
+/chart – Show repo tracking chart  
+/releases – Show latest releases
+
+---
+
+### 🚀 How It Works
+- Add this bot to your channel (as admin).
+- Add repos via Telegram like:  
+  `user/reo` or `https://github.com/user/repo`
+- When any repo releases a new version →  
+  🔔 Your Telegram channel gets notified instantly!
+
+---
+
+### 🤖 Built with ❤️ by [@beingsk5](https://github.com/beingsk5)
