@@ -34,7 +34,7 @@
 ### 🚀 How It Works
 - Add this bot to your channel (as admin).
 - Add repos via Telegram like:  
-  `user/reo` or `https://github.com/user/repo`
+  `user/repo` or `https://github.com/user/repo`
 - When any repo releases a new version →  
   🔔 Your Telegram channel gets notified instantly!
 
