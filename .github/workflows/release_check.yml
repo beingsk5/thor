@@ -25,7 +25,7 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           TELEGRAM_CHANNEL: ${{ secrets.TELEGRAM_CHANNEL }}
         run: |
-          python <<EOF
+          cat > poll_github.py <<EOF
 import os
 import json
 import requests
@@ -86,6 +86,7 @@ def main():
 if __name__ == "__main__":
     main()
 EOF
+          python poll_github.py
 
       - name: Commit & Push notification state and badge
         run: |
