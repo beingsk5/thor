@@ -1,5 +1,23 @@
 {
   "repos": [
-    "JingMatrix/LSPosed"
+    "JingMatrix/LSPosed",
+    "AloozChips/OneUIEmojiPack",
+    "Mahmud0808/Iconify",
+    "Dev4Mod/WaEnhancer",
+    "osm0sis/PlayIntegrityFork",
+    "JingMatrix/NeoZygisk",
+    "KOWX712/Tricky-Addon-Update-Target-List",
+    "Pixel-Props/BetterKnownInstalled",
+    "5ec1cff/TrickyStore",
+    "j-hc/zygisk-detach-app",
+    "Dr-TSNG/ZygiskNext",
+    "reveny/Android-VBMeta-Fixer",
+    "d4rken-org/sdmaid-se",
+    "snake-4/Zygisk-Assistant",
+    "vvb2060/KeyAttestation",
+    "j-hc/zygisk-detach",
+    "LSPosed/LSPosed.github.io",
+    "EricInacio01/PlayIntegrityFix-NEXT",
+    "ZG089/Re-Malwack"
   ]
 }
