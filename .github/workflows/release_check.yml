@@ -25,15 +25,13 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           TELEGRAM_CHANNEL: ${{ secrets.TELEGRAM_CHANNEL }}
         run: |
-          echo "import os
-import json
-import requests
+          echo "import os import json import requests"
 
-TRACKED_FILE = 'data/tracked.json'
-NOTIFIED_FILE = 'data/notified.json'
-BADGE_FILE = 'badge/tracked-count.json'
-BOT_TOKEN = os.environ['TELEGRAM_BOT_TOKEN']
-CHANNEL = os.environ['TELEGRAM_CHANNEL']
+          TRACKED_FILE = 'data/tracked.json'
+          NOTIFIED_FILE = 'data/notified.json'
+          BADGE_FILE = 'badge/tracked-count.json'
+          BOT_TOKEN = os.environ['TELEGRAM_BOT_TOKEN']
+          CHANNEL = os.environ['TELEGRAM_CHANNEL']
 
 def send_telegram(text, btn_url=None):
     json_body = {
