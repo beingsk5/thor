@@ -16,7 +16,8 @@
 ---
 
 ### 📊 Tracked Repositories
-![Tracked repos](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/<GITHUB_OWNER>/<GITHUB_REPO>/main/badge/tracked-count.json)
+![Tracked repos](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/beingsk5/thor/main/badge/tracked-count.json)
+
 
 ---
 
