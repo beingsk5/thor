@@ -18,6 +18,11 @@
     "j-hc/zygisk-detach",
     "LSPosed/LSPosed.github.io",
     "EricInacio01/PlayIntegrityFix-NEXT",
-    "ZG089/Re-Malwack"
+    "ZG089/Re-Malwack",
+    "chsbuffer/ReVancedXposed",
+    "PerformanC/ReZygisk",
+    "dpejoh/yurikey",
+    "MhmRdd/NoHello",
+    "chenxiaolong/BCR"
   ]
 }
