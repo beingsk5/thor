@@ -2,24 +2,18 @@ import os
 import re
 import json
 import requests
+from datetime import datetime, timezone
 import matplotlib.pyplot as plt
 from io import BytesIO
 from telegram import Update, ReplyKeyboardMarkup, InputFile
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 
-# ===========================
-# Environment PRESET
-# ===========================
 BOT_TOKEN = os.environ['BOT_TOKEN']
 GITHUB_OWNER = os.environ['GITHUB_OWNER']
 GITHUB_REPO = os.environ['GITHUB_REPO']
 GITHUB_TOKEN = os.environ['GITHUB_TOKEN']
-ADMIN_ID = int(os.environ.get("ADMIN_ID", "123456"))  # Your Telegram user ID
+ADMIN_ID = int(os.environ.get("ADMIN_ID", "123456"))
 DATA_PATH = "data/tracked.json"
-
-# ===========================
-# GITHUB API I/O
-# ===========================
 
 def github_headers():
     return {"Authorization": f"token {GITHUB_TOKEN}"}
@@ -52,29 +46,18 @@ def save_tracked(repos, sha):
     r.raise_for_status()
     return r.json()['content']['sha']
 
-# ===========================
-# Repo Extraction & Validation
-# ===========================
-
 def extract_repos_from_text(text):
-    """
-    Extract all username/repo or github.com/username/repo links from arbitrary text.
-    Allows comma, space, or newline separation.
-    """
+    # Accept username/repo, github.com/username/repo, spaced/comma/newline separated
+    text = text.replace(',', ' ').replace('\n', ' ')
     pattern = r'(?:https?://github\.com/)?([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+)'
     found = re.findall(pattern, text)
     clean = set(f"{u}/{r}" for (u, r) in found)
     return clean
 
 def validate_repo_exists(repo):
-    """Return True iff https://github.com/{repo} exists (for add); skip for remove."""
     url = f"https://api.github.com/repos/{repo}"
     r = requests.get(url)
     return r.ok
-
-# ===========================
-# HANDLERS
-# ===========================
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
@@ -82,15 +65,15 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ["/chart", "/about", "/help"]
     ]
     await update.message.reply_text(
-        "👋 Hi! Paste GitHub repos or use /add, /remove, /list, /chart buttons.\n"
-        "Send multiple repos separated by space, comma, or newline.",
+        "👋 Hi! Paste GitHub repos or use /add /remove /list /chart commands.\n"
+        "Send multiple repos using space, comma, or newline.",
         reply_markup=ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     )
 
 async def help_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "/add <repo(s)> — Add one or multiple repos (url or username/repo)\n"
-        "/remove <repo> — Remove a tracked repo (url or username/repo)\n"
+        "/add <repo(s)> — Add one or more repos (url or username/repo)\n"
+        "/remove <repo> — Remove a tracked repo\n"
         "/list — Show tracked repos\n"
         "/releases — Show recent releases\n"
         "/chart — Release chart\n"
@@ -114,17 +97,15 @@ async def add_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not context.args:
         await update.message.reply_text("Usage: /add <repo(s) or links>")
         return
-    text = " ".join(context.args)
-    await process_repo_addition(update, text)
+    await process_repo_addition(update, " ".join(context.args))
 
 async def remove_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not context.args:
         await update.message.reply_text("Usage: /remove <repo or link>")
         return
-    text = " ".join(context.args)
-    repos_to_remove = extract_repos_from_text(text)
+    repos_to_remove = extract_repos_from_text(" ".join(context.args))
     if not repos_to_remove:
-        await update.message.reply_text("No valid repositories recognized for removal.")
+        await update.message.reply_text("No valid repositories recognized for removal. Please check the format (username/repo or link).")
         return
     repos, sha = load_tracked()
     actually_removed, not_found = [], []
@@ -144,15 +125,22 @@ async def remove_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(msg or "Nothing to remove.")
 
 async def any_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # Ignore command messages here
     if update.message.text.startswith('/'):
         return
-    text = update.message.text
-    await process_repo_addition(update, text)
+    await process_repo_addition(update, update.message.text)
 
 async def process_repo_addition(update, text):
     repos_to_check = extract_repos_from_text(text)
     if not repos_to_check:
-        await update.message.reply_text("No valid repositories found in your message.")
+        await update.message.reply_text(
+            "❗ No valid repositories found. Please use the format username/repo or paste a full GitHub repo link."
+        )
+        return
+    if len(repos_to_check) > 20:
+        await update.message.reply_text(
+            "⚠️ Too many repos in one message (max 20 at a time). Please send in smaller batches."
+        )
         return
     added, skipped, failed = [], [], []
     repos, sha = load_tracked()
@@ -160,11 +148,14 @@ async def process_repo_addition(update, text):
         if repo in repos:
             skipped.append(repo)
             continue
-        if validate_repo_exists(repo):
-            repos.append(repo)
-            added.append(repo)
-        else:
-            failed.append(repo)
+        try:
+            if validate_repo_exists(repo):
+                repos.append(repo)
+                added.append(repo)
+            else:
+                failed.append(repo)
+        except Exception as e:
+            failed.append(f"{repo} (error: {str(e)})")
     if added:
         save_tracked(repos, sha)
     msg = ""
@@ -191,14 +182,19 @@ async def releases_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("No tracked repositories. Add some first.")
         return
     msg = ""
+    today = datetime.now(timezone.utc).date()
     for repo in repos:
         resp = requests.get(f"https://api.github.com/repos/{repo}/releases")
         releases = resp.json() if resp.ok else []
         if releases:
             rel = releases[0]
-            msg += f"🔹 [{repo}]({rel['html_url']}): [{rel['tag_name']}]({rel['html_url']})\n"
+            rel_date = datetime.fromisoformat(rel["published_at"].replace("Z", "+00:00")).date()
+            if rel_date < today:
+                msg += f"🔹 `{repo}`: No new releases today.\n"
+            else:
+                msg += f"🔹 [{repo}]({rel['html_url']}): [{rel['tag_name']}]({rel['html_url']}) (`{rel_date}`)\n"
         else:
-            msg += f"🔸 {repo}: No releases 👀\n"
+            msg += f"🔸 {repo}: No releases found.\n"
     await update.message.reply_text(msg, parse_mode="Markdown", disable_web_page_preview=True)
 
 async def clearall_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -222,10 +218,12 @@ async def chart_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
             resp = requests.get(url)
             if resp.ok:
                 releases = resp.json()
-        except Exception: pass
-        months = [r["published_at"][:7] for r in releases if "published_at" in r]
+        except Exception:
+            continue
+        months = [r.get("published_at", "")[:7] for r in releases if "published_at" in r]
         for month in months:
-            release_counts[month] = release_counts.get(month, 0) + 1
+            if month:
+                release_counts[month] = release_counts.get(month, 0) + 1
     if not release_counts:
         await update.message.reply_text("No release history yet.")
         return
@@ -241,10 +239,6 @@ async def chart_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chart_img.seek(0)
     await update.message.reply_photo(photo=InputFile(chart_img, filename="releases.png"))
 
-# ===========================
-# BOT REGISTRATION
-# ===========================
-
 if __name__ == '__main__':
     app = ApplicationBuilder().token(BOT_TOKEN).build()
     app.add_handler(CommandHandler("start", start))
@@ -257,6 +251,5 @@ if __name__ == '__main__':
     app.add_handler(CommandHandler("releases", releases_cmd))
     app.add_handler(CommandHandler("clearall", clearall_cmd))
     app.add_handler(CommandHandler("chart", chart_cmd))
-    # Universal message handler for all non-command text
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, any_message))
     app.run_polling()
