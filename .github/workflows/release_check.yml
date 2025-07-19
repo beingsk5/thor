@@ -25,6 +25,7 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           TELEGRAM_CHANNEL: ${{ secrets.TELEGRAM_CHANNEL }}
         run: |
+          echo "Writing poll_github.py"
           cat > poll_github.py <<EOF
 import os
 import json
