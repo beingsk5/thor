@@ -17,33 +17,19 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install requests
+      - name: Install dependencies
         run: pip install requests
 
       - name: Poll for new releases and notify channel
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           TELEGRAM_CHANNEL: ${{ secrets.TELEGRAM_CHANNEL }}
+        run: python poll_github.py
+
+      - name: Commit & Push notification state and badge
         run: |
-          echo "import os import json import requests"
-
-          TRACKED_FILE = 'data/tracked.json'
-          NOTIFIED_FILE = 'data/notified.json'
-          BADGE_FILE = 'badge/tracked-count.json'
-          BOT_TOKEN = os.environ['TELEGRAM_BOT_TOKEN']
-          CHANNEL = os.environ['TELEGRAM_CHANNEL']
-
-def send_telegram(text, btn_url=None):
-    json_body = {
-        'chat_id': CHANNEL,
-        'text': text,
-        'parse_mode': 'Markdown',
-        'disable_web_page_preview': False
-    }
-    if btn_url:
-        json_body['reply_markup'] = {
-            'inline_keyboard': [[{'text': '⬇️ View release', 'url': btn_url}]]
-        }
-    requests.post(
-        f'https://api.telegram.org/bot{BOT_TOKEN}/sendMessage',
-        json=json_body
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add data/notified.json badge/tracked-count.json
+          git commit -m "Update notified releases and badge [auto]" || echo "Nothing to commit"
+          git push
