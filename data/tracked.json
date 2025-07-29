@@ -40,6 +40,7 @@
     "symbuzzer/systemless-hosts-KernelSU-module",
     "NeoApplications/Neo-Store",
     "Droid-ify/client",
-    "Tornaco/Thanox"
+    "Tornaco/Thanox",
+    "revenge-mod/revenge-xposed"
   ]
 }
