@@ -42,6 +42,7 @@
     "Droid-ify/client",
     "Tornaco/Thanox",
     "revenge-mod/revenge-xposed",
-    "ReSo7200/InstaEclipse"
+    "ReSo7200/InstaEclipse",
+    "Magisk-Modules-Alt-Repo/audio-jitter-silencer"
   ]
 }
