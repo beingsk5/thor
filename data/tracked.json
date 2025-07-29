@@ -53,6 +53,7 @@
     "Xposed-Modules-Repo/io.github.wzhy.xaudiocapture",
     "XayahSuSuSu/Android-DataBackup",
     "UNKNUW/Background-App-Slayer",
-    "Skyghost090/Extreme-Gms-Doze"
+    "Skyghost090/Extreme-Gms-Doze",
+    "NoWakeLock/NoWakeLock"
   ]
 }
