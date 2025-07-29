@@ -49,6 +49,7 @@
     "auag0/DisableAudioFocus",
     "james34602/JamesDSPManager",
     "Briclyaz/NLSound_module_QCom",
-    "WSTxda/ViperFX-RE-Releases"
+    "WSTxda/ViperFX-RE-Releases",
+    "Xposed-Modules-Repo/io.github.wzhy.xaudiocapture"
   ]
 }
