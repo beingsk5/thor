@@ -44,6 +44,7 @@
     "revenge-mod/revenge-xposed",
     "ReSo7200/InstaEclipse",
     "Magisk-Modules-Alt-Repo/audio-jitter-silencer",
-    "Magisk-Modules-Alt-Repo/audio-misc-settings"
+    "Magisk-Modules-Alt-Repo/audio-misc-settings",
+    "Magisk-Modules-Alt-Repo/audio-samplerate-changer"
   ]
 }
