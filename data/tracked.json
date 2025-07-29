@@ -46,6 +46,7 @@
     "Magisk-Modules-Alt-Repo/audio-jitter-silencer",
     "Magisk-Modules-Alt-Repo/audio-misc-settings",
     "Magisk-Modules-Alt-Repo/audio-samplerate-changer",
-    "auag0/DisableAudioFocus"
+    "auag0/DisableAudioFocus",
+    "james34602/JamesDSPManager"
   ]
 }
