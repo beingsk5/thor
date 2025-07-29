@@ -47,6 +47,7 @@
     "Magisk-Modules-Alt-Repo/audio-misc-settings",
     "Magisk-Modules-Alt-Repo/audio-samplerate-changer",
     "auag0/DisableAudioFocus",
-    "james34602/JamesDSPManager"
+    "james34602/JamesDSPManager",
+    "Briclyaz/NLSound_module_QCom"
   ]
 }
