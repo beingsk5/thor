@@ -67,6 +67,7 @@
     "xfqwdsj/IAmNotADeveloper",
     "Magisk-Modules-Alt-Repo/chroot-distro",
     "RikkaApps/Shizuku",
-    "mgksu/dockerd"
+    "mgksu/dockerd",
+    "FurLC/ZRAM-Module"
   ]
 }
