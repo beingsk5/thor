@@ -68,6 +68,7 @@
     "Magisk-Modules-Alt-Repo/chroot-distro",
     "RikkaApps/Shizuku",
     "mgksu/dockerd",
-    "FurLC/ZRAM-Module"
+    "FurLC/ZRAM-Module",
+    "AnsahMohammad/shots-studio"
   ]
 }
