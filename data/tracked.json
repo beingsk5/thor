@@ -73,6 +73,7 @@
     "FossifyOrg/File-Manager",
     "zhanghai/MaterialFiles",
     "fatalcoder524/KernelFlasher",
-    "reveny/Android-Native-Root-Detector"
+    "reveny/Android-Native-Root-Detector",
+    "Magisk-Modules-Alt-Repo/abootloop"
   ]
 }
