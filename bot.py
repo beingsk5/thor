@@ -6,7 +6,7 @@ import aiohttp
 from datetime import datetime, timezone
 from telegram import (
     Update, MessageEntity, BotCommand, ReplyKeyboardRemove,
-    KeyboardButton, ReplyKeyboardMarkup
+    ReplyKeyboardMarkup
 )
 from telegram.ext import (
     Application, CommandHandler, MessageHandler,
@@ -15,7 +15,7 @@ from telegram.ext import (
 
 TRACKED_FILE = 'data/tracked.json'
 CHANNEL = os.environ['TELEGRAM_CHANNEL']   # e.g. "@yourchannel" or channel ID
-BOT_TOKEN = os.environ['TELEGRAM_BOT_TOKEN']
+BOT_TOKEN = os.environ['BOT_TOKEN']        # <<--- FIXED HERE!!!
 GITHUB_TOKEN = os.environ.get('GITHUB_TOKEN', '')
 
 def get_repo_name(input_str):
@@ -200,7 +200,6 @@ async def cmd_chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     repo_counts.append((just_repo(repo), len(releases)))
                 else:
                     repo_counts.append((just_repo(repo), 0))
-    # Simple text chart
     chart = "\n".join([f"{name}: " + "▇" * min(count,20) + (f" ({count})" if count else "") for name, count in repo_counts])
     await update.message.reply_text(f"📊 <b>Release Count Chart</b>:\n{chart}", parse_mode="HTML")
 
@@ -243,7 +242,6 @@ async def cmd_clearall(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['awaiting_clearall'] = True
 
 async def handle_clearall_reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # Only run if awaiting confirmation
     if context.user_data.get('awaiting_clearall'):
         txt = (update.message.text or "").strip().lower()
         if txt == "yes":
@@ -283,7 +281,6 @@ async def cmd_notify(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # If awaiting clearall confirmation:
     if await handle_clearall_reply(update, context):
         return
     text = update.message.text or ""
@@ -292,7 +289,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def main():
     app = Application.builder().token(BOT_TOKEN).build()
-    # Command handlers
     app.add_handler(CommandHandler("add", cmd_add))
     app.add_handler(CommandHandler("remove", cmd_remove))
     app.add_handler(CommandHandler("list", cmd_list))
@@ -303,11 +299,9 @@ def main():
     app.add_handler(CommandHandler("clearall", cmd_clearall))
     app.add_handler(CommandHandler("ping", cmd_ping))
     app.add_handler(CommandHandler("notify", cmd_notify))
-    # Message and input handlers
     app.add_handler(MessageHandler(
         filters.TEXT & (~filters.COMMAND), handle_message
     ))
-    # Set bot command menu/buttons
     commands = [
         BotCommand("add",     "Add a repo to tracking"),
         BotCommand("remove",  "Remove a repo from tracking"),
