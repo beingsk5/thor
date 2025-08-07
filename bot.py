@@ -55,7 +55,7 @@ async def fetch_latest_release(session, repo):
             return releases[0]
         return None
 
-# Main notification for channel (repo name only)
+# Notification for channel (repo name only, but with assets)
 async def send_channel_notification(context, release, repo, notify_assets=True):
     tag = release['tag_name']
     date_str = (datetime.fromisoformat(release["published_at"].replace("Z", "+00:00"))
@@ -84,13 +84,13 @@ async def send_channel_notification(context, release, repo, notify_assets=True):
     )
     if notify_assets:
         for asset in release.get("assets", []):
-            aname = asset.get("name", "").lower()
-            alabel = asset.get("label", "").lower()
+            aname = (asset.get("name") or "").lower()
+            alabel = (asset.get("label") or "").lower()
             print(f"[DEBUG] Found asset: {asset.get('name')}")
             if "source code" in aname or "source code" in alabel:
                 print(f"[DEBUG] Skipped 'source code' asset: {asset.get('name')}")
                 continue
-            clean_name = strip_extension(asset["name"])
+            clean_name = strip_extension(asset.get("name") or "")
             caption = f"⬇️ <b>{clean_name}</b> from <b>{repo_only}</b> {release['tag_name']}"
             headers = {'Authorization': f'token {GITHUB_TOKEN}'} if GITHUB_TOKEN else {}
             try:
@@ -98,11 +98,11 @@ async def send_channel_notification(context, release, repo, notify_assets=True):
                     async with s.get(asset["browser_download_url"], headers=headers) as r:
                         file_bytes = await r.read()
                 if len(file_bytes) > 49_000_000:
-                    print(f"[DEBUG] Skipping {asset['name']} (too large for Telegram upload)")
+                    print(f"[DEBUG] Skipping {asset.get('name')} (too large for Telegram upload)")
                     continue
                 await context.bot.send_document(
                     chat_id=CHANNEL,
-                    document=(asset["name"], file_bytes),
+                    document=(asset.get("name"), file_bytes),
                     caption=caption,
                     parse_mode="HTML"
                 )
