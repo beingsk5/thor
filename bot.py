@@ -4,6 +4,7 @@ import asyncio
 import re
 import aiohttp
 from datetime import datetime, timezone
+from io import BytesIO
 from telegram import (
     Update, InlineKeyboardButton, InlineKeyboardMarkup,
     ReplyKeyboardRemove, ReplyKeyboardMarkup
@@ -55,11 +56,10 @@ async def fetch_latest_release(session, repo):
             return releases[0]
         return None
 
-# Notification for channel (repo name only, but with assets)
+# Channel notification with proper file sending & debug
 async def send_channel_notification(context, release, repo, notify_assets=True):
     tag = release['tag_name']
-    date_str = (datetime.fromisoformat(release["published_at"].replace("Z", "+00:00"))
-                .strftime('%Y-%m-%d')) if 'published_at' in release else ''
+    date_str = (datetime.fromisoformat(release["published_at"].replace("Z", "+00:00")).strftime('%Y-%m-%d')) if 'published_at' in release else ''
     changelog = (release.get('body') or '').replace('<', '&lt;').replace('>', '&gt;')
     changelog = (changelog[:300] + "…") if len(changelog) > 300 else changelog
     name = release.get("name") or ""
@@ -102,7 +102,7 @@ async def send_channel_notification(context, release, repo, notify_assets=True):
                     continue
                 await context.bot.send_document(
                     chat_id=CHANNEL,
-                    document=(asset.get("name"), file_bytes),
+                    document=(BytesIO(file_bytes), asset.get("name")),
                     caption=caption,
                     parse_mode="HTML"
                 )
