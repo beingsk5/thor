@@ -5,20 +5,23 @@ import re
 import aiohttp
 from datetime import datetime, timezone
 from telegram import (
-    Update, ReplyKeyboardRemove, ReplyKeyboardMarkup, BotCommand
+    Update, InlineKeyboardButton, InlineKeyboardMarkup,
+    ReplyKeyboardRemove, ReplyKeyboardMarkup
 )
 from telegram.ext import (
-    Application, CommandHandler, MessageHandler,
+    Application, CommandHandler, MessageHandler, CallbackQueryHandler,
     filters, ContextTypes
 )
 
 TRACKED_FILE = 'data/tracked.json'
-CHANNEL = os.environ['TELEGRAM_CHANNEL']   # e.g. "@yourchannel" or channel ID
+CHANNEL = os.environ['TELEGRAM_CHANNEL']
 BOT_TOKEN = os.environ['BOT_TOKEN']
 GITHUB_TOKEN = os.environ.get('GITHUB_TOKEN', '')
 
+RELEASES_PAGE_SIZE = 15   # Adjust as desired, tries to keep under 4096 chars
+
 def get_repo_name(input_str):
-    m = re.search(r'([\w-]+)/([\w\-\.]+)', input_str)
+    m = re.search(r'([\w-]+)/([\w\-.]+)', input_str)
     return m.group(0) if m else None
 
 def just_repo(repo):
@@ -52,6 +55,9 @@ async def fetch_latest_release(session, repo):
             return releases[0]
         return None
 
+#
+# Channel notification: ONLY show repo name (not user/repo)
+#
 async def send_channel_notification(context, release, repo, notify_assets=True):
     tag = release['tag_name']
     date_str = (datetime.fromisoformat(release["published_at"].replace("Z", "+00:00"))
@@ -74,11 +80,9 @@ async def send_channel_notification(context, release, repo, notify_assets=True):
         text=msg,
         parse_mode="HTML",
         disable_web_page_preview=True,
-        reply_markup={
-            "inline_keyboard": [[
-                {"text": "⬇️ View Release", "url": release['html_url']}
-            ]]
-        }
+        reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("⬇️ View Release", url=release['html_url'])]
+        ])
     )
     if notify_assets:
         for asset in release.get("assets", []):
@@ -119,7 +123,7 @@ async def handle_add(update: Update, context: ContextTypes.DEFAULT_TYPE):
         tracked.append(repo)
         save_tracked(tracked)
         notice = await message.reply_text(
-            f"Started tracking <b>{just_repo(repo)}</b>.", parse_mode="HTML", quote=True)
+            f"Started tracking <b>{repo}</b>.", parse_mode="HTML", quote=True)
         await asyncio.sleep(1)
         await message.delete()
         await notice.delete()
@@ -146,7 +150,7 @@ async def cmd_remove(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if repo in tracked:
         tracked.remove(repo)
         save_tracked(tracked)
-        await update.message.reply_text(f"Removed <b>{just_repo(repo)}</b> from tracking.", parse_mode="HTML")
+        await update.message.reply_text(f"Removed <b>{repo}</b> from tracking.", parse_mode="HTML")
     else:
         await update.message.reply_text("Repo was not being tracked.")
 
@@ -155,30 +159,59 @@ async def cmd_list(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not tracked:
         await update.message.reply_text("No repos are being tracked.")
         return
-    msg = "📋 <b>Tracked Repositories:</b>\n" + "\n".join(f"- <b>{just_repo(r)}</b>" for r in tracked)
+    msg = "📋 <b>Tracked Repositories:</b>\n" + "\n".join(f"- <b>{r}</b>" for r in tracked)
     await update.message.reply_text(msg, parse_mode="HTML")
 
+#
+# /releases supports inline pagination
+#
 async def cmd_releases(update: Update, context: ContextTypes.DEFAULT_TYPE):
     tracked = load_tracked()
     if not tracked:
         await update.message.reply_text("No repos are being tracked.")
         return
-    waitmsg = await update.message.reply_text(
-        "Fetching latest releases...", quote=True)
+    page = 0
+    await show_releases_page(update, context, tracked, page)
+
+async def show_releases_page(update, context, tracked, page_idx):
+    PAGE_SIZE = RELEASES_PAGE_SIZE
+    start = page_idx * PAGE_SIZE
+    end = start + PAGE_SIZE
+    subset = tracked[start:end]
+    text_title = f"📦 <b>Latest releases ({start+1}-{min(end, len(tracked))} / {len(tracked)})</b>\n\n"
     async with aiohttp.ClientSession() as session:
-        tasks = [fetch_latest_release(session, repo) for repo in tracked]
+        tasks = [fetch_latest_release(session, repo) for repo in subset]
         releases_list = await asyncio.gather(*tasks)
-    msg = ""
-    for repo, rel in zip(tracked, releases_list):
-        repo_only = just_repo(repo)
+    msg = text_title
+    for repo, rel in zip(subset, releases_list):
         if rel:
             tag = rel.get("tag_name", "")
             date = rel.get("published_at", "")[:10]
             name = rel.get("name", "") or ""
-            msg += f"🔹 <b>{repo_only}</b>: {tag} ({date}) {name}\n"
+            msg += f"🔹 <b>{repo}</b> — <code>{tag}</code> ({date}) {name}\n"
         else:
-            msg += f"🔸 <b>{repo_only}</b>: No release\n"
-    await waitmsg.edit_text(msg, parse_mode="HTML")
+            msg += f"🔸 <b>{repo}</b>: No release\n"
+    nav_buttons = []
+    if page_idx > 0:
+        nav_buttons.append(InlineKeyboardButton("⬅️ Back", callback_data=f"rel_page:{page_idx-1}"))
+    if end < len(tracked):
+        nav_buttons.append(InlineKeyboardButton("Next ➡️", callback_data=f"rel_page:{page_idx+1}"))
+    reply_markup = InlineKeyboardMarkup([nav_buttons] if nav_buttons else [])
+    if update.message:
+        await update.message.reply_text(msg, parse_mode="HTML", reply_markup=reply_markup)
+    else:  # editing prev page
+        await update.callback_query.edit_message_text(msg, parse_mode="HTML", reply_markup=reply_markup)
+
+#
+# Pagination handler for /releases inline keyboard
+#
+async def cb_rel_page(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    m = re.match(r"rel_page:(\d+)", query.data)
+    idx = int(m.group(1))
+    tracked = load_tracked()
+    await show_releases_page(update, context, tracked, idx)
 
 async def cmd_chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
     tracked = load_tracked()
@@ -196,9 +229,9 @@ async def cmd_chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
             async with session.get(url, headers=headers, timeout=10) as resp:
                 if resp.status == 200:
                     releases = await resp.json()
-                    repo_counts.append((just_repo(repo), len(releases)))
+                    repo_counts.append((repo, len(releases)))
                 else:
-                    repo_counts.append((just_repo(repo), 0))
+                    repo_counts.append((repo, 0))
     chart = "\n".join([f"{name}: " + "▇" * min(count,20) + (f" ({count})" if count else "") for name, count in repo_counts])
     await update.message.reply_text(f"📊 <b>Release Count Chart</b>:\n{chart}", parse_mode="HTML")
 
@@ -288,7 +321,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def main():
     app = Application.builder().token(BOT_TOKEN).build()
-    # Command handlers
     app.add_handler(CommandHandler("add", cmd_add))
     app.add_handler(CommandHandler("remove", cmd_remove))
     app.add_handler(CommandHandler("list", cmd_list))
@@ -302,6 +334,7 @@ def main():
     app.add_handler(MessageHandler(
         filters.TEXT & (~filters.COMMAND), handle_message
     ))
+    app.add_handler(CallbackQueryHandler(cb_rel_page, pattern=r"rel_page:\d+"))
     print("Bot running…")
     app.run_polling()
 
