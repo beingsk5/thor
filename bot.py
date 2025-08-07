@@ -18,6 +18,7 @@ TRACKED_FILE = 'data/tracked.json'
 CHANNEL = os.environ['TELEGRAM_CHANNEL']
 BOT_TOKEN = os.environ['BOT_TOKEN']
 GITHUB_TOKEN = os.environ.get('GITHUB_TOKEN', '')
+TELEGRAM_API_URL = f'https://api.telegram.org/bot{BOT_TOKEN}/sendDocument'
 
 RELEASES_PAGE_SIZE = 15   # Adjust as desired
 
@@ -56,7 +57,24 @@ async def fetch_latest_release(session, repo):
             return releases[0]
         return None
 
-# Channel notification with proper file sending & debug
+# ─── Poll-script style file uploader (API direct) ───
+async def telegram_file_upload(file_bytes, filename, caption, parse_mode='HTML'):
+    from aiohttp import FormData
+    data = FormData()
+    data.add_field('chat_id', CHANNEL)
+    data.add_field('caption', caption)
+    data.add_field('parse_mode', parse_mode)
+    data.add_field('document', file_bytes, filename=filename)
+    async with aiohttp.ClientSession() as session:
+        async with session.post(TELEGRAM_API_URL, data=data) as resp:
+            text = await resp.text()
+            if resp.status != 200 or '"ok":false' in text:
+                print(f"[ERROR] Telegram file upload failed: {resp.status} / {text}")
+                return False
+    print(f"[DEBUG] Telegram sent file {filename}")
+    return True
+
+# --- Unified notification: repo name only, then files ---
 async def send_channel_notification(context, release, repo, notify_assets=True):
     tag = release['tag_name']
     date_str = (datetime.fromisoformat(release["published_at"].replace("Z", "+00:00")).strftime('%Y-%m-%d')) if 'published_at' in release else ''
@@ -82,6 +100,7 @@ async def send_channel_notification(context, release, repo, notify_assets=True):
             [InlineKeyboardButton("⬇️ View Release", url=release['html_url'])]
         ])
     )
+    # -- Asset handling, "works like poll_github.py" --
     if notify_assets:
         for asset in release.get("assets", []):
             aname = (asset.get("name") or "").lower()
@@ -100,13 +119,9 @@ async def send_channel_notification(context, release, repo, notify_assets=True):
                 if len(file_bytes) > 49_000_000:
                     print(f"[DEBUG] Skipping {asset.get('name')} (too large for Telegram upload)")
                     continue
-                await context.bot.send_document(
-                    chat_id=CHANNEL,
-                    document=(BytesIO(file_bytes), asset.get("name")),
-                    caption=caption,
-                    parse_mode="HTML"
-                )
-                print(f"[DEBUG] Uploaded asset: {asset.get('name')}")
+                ok = await telegram_file_upload(BytesIO(file_bytes), asset.get("name"), caption)
+                if not ok:
+                    await context.bot.send_message(chat_id=CHANNEL, text=f"Failed to send `{asset.get('name')}`")
             except Exception as e:
                 print(f"[ERROR] Failed to upload {asset.get('name')} : {str(e)}")
                 await context.bot.send_message(chat_id=CHANNEL, text=f"Failed to send `{asset.get('name')}`: {e}")
@@ -120,16 +135,14 @@ async def handle_add(update: Update, context: ContextTypes.DEFAULT_TYPE):
     tracked = load_tracked()
     try:
         if repo in tracked:
-            notice = await message.reply_text(
-                "Already tracking this repo!", quote=True)
+            notice = await message.reply_text("Already tracking this repo!", quote=True)
             await asyncio.sleep(1)
             await message.delete()
             await notice.delete()
             return
         tracked.append(repo)
         save_tracked(tracked)
-        notice = await message.reply_text(
-            f"Started tracking <b>{repo}</b>.", parse_mode="HTML", quote=True)
+        notice = await message.reply_text(f"Started tracking <b>{repo}</b>.", parse_mode="HTML", quote=True)
         await asyncio.sleep(1)
         await message.delete()
         await notice.delete()
@@ -168,7 +181,6 @@ async def cmd_list(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = "📋 <b>Tracked Repositories:</b>\n" + "\n".join(f"- <b>{r}</b>" for r in tracked)
     await update.message.reply_text(msg, parse_mode="HTML")
 
-# /releases with inline pagination if too many
 async def cmd_releases(update: Update, context: ContextTypes.DEFAULT_TYPE):
     tracked = load_tracked()
     if not tracked:
