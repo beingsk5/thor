@@ -15,7 +15,7 @@ from telegram.ext import (
 
 TRACKED_FILE = 'data/tracked.json'
 CHANNEL = os.environ['TELEGRAM_CHANNEL']   # e.g. "@yourchannel" or channel ID
-BOT_TOKEN = os.environ['BOT_TOKEN']        # <<--- FIXED HERE!!!
+BOT_TOKEN = os.environ['BOT_TOKEN']        # <<--- uses BOT_TOKEN as you want!
 GITHUB_TOKEN = os.environ.get('GITHUB_TOKEN', '')
 
 def get_repo_name(input_str):
@@ -289,6 +289,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def main():
     app = Application.builder().token(BOT_TOKEN).build()
+    # Command handlers
     app.add_handler(CommandHandler("add", cmd_add))
     app.add_handler(CommandHandler("remove", cmd_remove))
     app.add_handler(CommandHandler("list", cmd_list))
@@ -314,9 +315,8 @@ def main():
         BotCommand("help",    "How to use the bot"),
         BotCommand("about",   "About this bot"),
     ]
-    asyncio.get_event_loop().run_until_complete(
-        app.bot.set_my_commands(commands)
-    )
+    import asyncio
+    asyncio.run(app.bot.set_my_commands(commands))
     print("Bot running…")
     app.run_polling()
 
