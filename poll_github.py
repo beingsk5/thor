@@ -9,12 +9,22 @@ BADGE_FILE = 'badge/tracked-count.json'
 BOT_TOKEN = os.environ['TELEGRAM_BOT_TOKEN']
 CHANNEL = os.environ['TELEGRAM_CHANNEL']
 
+def get_repo_name(full_repo):
+    # Extract repo name from "user/repo"
+    return full_repo.split("/")[-1]
+
+def strip_extension(filename):
+    # Removes last extension from filename
+    if '.' in filename:
+        return '.'.join(filename.split('.')[:-1])
+    return filename
+
 def send_telegram_message(text, btn_url=None):
     json_body = {
         'chat_id': CHANNEL,
         'text': text,
         'parse_mode': 'HTML',
-        'disable_web_page_preview': False
+        'disable_web_page_preview': True  # Prevents embedded link preview in Telegram
     }
     if btn_url:
         json_body['reply_markup'] = {
@@ -25,20 +35,20 @@ def send_telegram_message(text, btn_url=None):
         json=json_body
     )
 
-def send_telegram_file(asset_url, filename, caption=""):
-    # Download asset to memory, send as document
+def send_telegram_file(asset_url, filename, repo, tag):
+    # Download asset and send as document, with no extension and no user/ prefix
     token = os.environ.get("GITHUB_TOKEN", "")
     headers = {'Authorization': f'token {token}'} if token else {}
     r = requests.get(asset_url, headers=headers, stream=True)
     file_data = r.content
-    # Telegram bots cannot upload files larger than 50 MB (standard accounts)
-    if len(file_data) > 49_000_000:
-        return False  # Skip large assets, or post a download link instead
+    clean_name = strip_extension(filename)
+    repo_only = get_repo_name(repo)
+    caption = f"⬇️ <b>{clean_name}</b> from <b>{repo_only}</b> {tag}"
     resp = requests.post(
         f'https://api.telegram.org/bot{BOT_TOKEN}/sendDocument',
         data={
             'chat_id': CHANNEL,
-            'caption': caption or filename,
+            'caption': caption,
             'parse_mode': 'HTML'
         },
         files={'document': (filename, file_data)}
@@ -61,18 +71,17 @@ def main():
         if not releases:
             continue
         latest = releases[0]
-        # Date logic: skip releases before today
         rel_date = None
         if 'published_at' in latest:
             rel_date = datetime.fromisoformat(latest["published_at"].replace("Z", "+00:00")).date()
         if rel_date is None or rel_date < today:
             continue
         if str(latest['id']) != str(notified.get(repo, '')):
-            # Prepare the formatted message
             notes = (latest.get("body") or '').replace('<', "&lt;").replace('>', "&gt;")
             note1 = (notes[:300] + "…") if notes and len(notes) > 300 else notes
+            repo_name = get_repo_name(repo)
             text = (
-                f"🆕 <b>{repo}</b> just published a new release!\n"
+                f"🆕 <b>{repo_name}</b> just published a new release!\n"
                 f"🔖 <b>{latest['tag_name']}</b> <code>({rel_date.strftime('%Y-%m-%d')})</code>\n"
             )
             if latest.get('name'):
@@ -80,10 +89,9 @@ def main():
             if note1:
                 text += f"\n📝 <b>Changelog:</b>\n{note1}\n"
             text += "\n⬇️ <b>Download below</b>:"
-            # Send the release notification
             send_telegram_message(text, btn_url=latest["html_url"])
 
-            # Send all non-"source code" assets as files
+            # Send all non-"source code" assets as files with stripped extension & repo name only
             for asset in latest.get("assets", []):
                 asset_name = (asset.get("name") or "").lower()
                 asset_label = (asset.get("label") or "").lower()
@@ -91,12 +99,12 @@ def main():
                     continue
                 send_telegram_file(
                     asset["browser_download_url"], asset["name"],
-                    caption=f"⬇️ <b>{asset['name']}</b> from <b>{repo}</b> {latest['tag_name']}"
+                    repo, latest["tag_name"]
                 )
             notified[repo] = str(latest['id'])
     with open(NOTIFIED_FILE, 'w') as f:
         json.dump(notified, f, indent=2)
-    # badge update (same as before)
+    # badge update 
     os.makedirs('badge', exist_ok=True)
     with open(BADGE_FILE, 'w') as f:
         json.dump({
