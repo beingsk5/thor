@@ -5,8 +5,7 @@ import re
 import aiohttp
 from datetime import datetime, timezone
 from telegram import (
-    Update, MessageEntity, BotCommand, ReplyKeyboardRemove,
-    ReplyKeyboardMarkup
+    Update, ReplyKeyboardRemove, ReplyKeyboardMarkup, BotCommand
 )
 from telegram.ext import (
     Application, CommandHandler, MessageHandler,
@@ -15,7 +14,7 @@ from telegram.ext import (
 
 TRACKED_FILE = 'data/tracked.json'
 CHANNEL = os.environ['TELEGRAM_CHANNEL']   # e.g. "@yourchannel" or channel ID
-BOT_TOKEN = os.environ['BOT_TOKEN']        # <<--- uses BOT_TOKEN as you want!
+BOT_TOKEN = os.environ['BOT_TOKEN']
 GITHUB_TOKEN = os.environ.get('GITHUB_TOKEN', '')
 
 def get_repo_name(input_str):
@@ -288,26 +287,23 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await handle_add(update, context)
 
 def main():
-    commands = [
-        BotCommand("add",     "Add a repo to tracking"),
-        BotCommand("remove",  "Remove a repo from tracking"),
-        BotCommand("list",    "List tracked repos"),
-        BotCommand("releases","Latest releases for tracked repos"),
-        BotCommand("chart",   "Release stats chart"),
-        BotCommand("notify",  "Force update to channel"),
-        BotCommand("clearall","Delete all tracked repos"),
-        BotCommand("ping",    "Bot health check"),
-        BotCommand("help",    "How to use the bot"),
-        BotCommand("about",   "About this bot"),
-    ]
-    async def set_commands(application):
-        await application.bot.set_my_commands(commands)
-
-    app = Application.builder().token(BOT_TOKEN).post_init(set_commands).build()
-    # ... your handler setup here ...
+    app = Application.builder().token(BOT_TOKEN).build()
+    # Command handlers
+    app.add_handler(CommandHandler("add", cmd_add))
+    app.add_handler(CommandHandler("remove", cmd_remove))
+    app.add_handler(CommandHandler("list", cmd_list))
+    app.add_handler(CommandHandler("releases", cmd_releases))
+    app.add_handler(CommandHandler("chart", cmd_chart))
+    app.add_handler(CommandHandler("help", cmd_help))
+    app.add_handler(CommandHandler("about", cmd_about))
+    app.add_handler(CommandHandler("clearall", cmd_clearall))
+    app.add_handler(CommandHandler("ping", cmd_ping))
+    app.add_handler(CommandHandler("notify", cmd_notify))
+    app.add_handler(MessageHandler(
+        filters.TEXT & (~filters.COMMAND), handle_message
+    ))
     print("Bot running…")
     app.run_polling()
 
 if __name__ == '__main__':
     main()
-    
