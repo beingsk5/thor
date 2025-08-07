@@ -288,21 +288,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await handle_add(update, context)
 
 def main():
-    app = Application.builder().token(BOT_TOKEN).build()
-    # Command handlers
-    app.add_handler(CommandHandler("add", cmd_add))
-    app.add_handler(CommandHandler("remove", cmd_remove))
-    app.add_handler(CommandHandler("list", cmd_list))
-    app.add_handler(CommandHandler("releases", cmd_releases))
-    app.add_handler(CommandHandler("chart", cmd_chart))
-    app.add_handler(CommandHandler("help", cmd_help))
-    app.add_handler(CommandHandler("about", cmd_about))
-    app.add_handler(CommandHandler("clearall", cmd_clearall))
-    app.add_handler(CommandHandler("ping", cmd_ping))
-    app.add_handler(CommandHandler("notify", cmd_notify))
-    app.add_handler(MessageHandler(
-        filters.TEXT & (~filters.COMMAND), handle_message
-    ))
     commands = [
         BotCommand("add",     "Add a repo to tracking"),
         BotCommand("remove",  "Remove a repo from tracking"),
@@ -315,10 +300,14 @@ def main():
         BotCommand("help",    "How to use the bot"),
         BotCommand("about",   "About this bot"),
     ]
-    import asyncio
-    asyncio.run(app.bot.set_my_commands(commands))
+    async def set_commands(application):
+        await application.bot.set_my_commands(commands)
+
+    app = Application.builder().token(BOT_TOKEN).post_init(set_commands).build()
+    # ... your handler setup here ...
     print("Bot running…")
     app.run_polling()
 
 if __name__ == '__main__':
     main()
+    
