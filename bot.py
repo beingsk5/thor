@@ -18,7 +18,7 @@ CHANNEL = os.environ['TELEGRAM_CHANNEL']
 BOT_TOKEN = os.environ['BOT_TOKEN']
 GITHUB_TOKEN = os.environ.get('GITHUB_TOKEN', '')
 
-RELEASES_PAGE_SIZE = 15   # Adjust as desired, tries to keep under 4096 chars
+RELEASES_PAGE_SIZE = 15   # Adjust as desired
 
 def get_repo_name(input_str):
     m = re.search(r'([\w-]+)/([\w\-.]+)', input_str)
@@ -55,9 +55,7 @@ async def fetch_latest_release(session, repo):
             return releases[0]
         return None
 
-#
-# Channel notification: ONLY show repo name (not user/repo)
-#
+# Main notification for channel (repo name only)
 async def send_channel_notification(context, release, repo, notify_assets=True):
     tag = release['tag_name']
     date_str = (datetime.fromisoformat(release["published_at"].replace("Z", "+00:00"))
@@ -88,22 +86,30 @@ async def send_channel_notification(context, release, repo, notify_assets=True):
         for asset in release.get("assets", []):
             aname = asset.get("name", "").lower()
             alabel = asset.get("label", "").lower()
+            print(f"[DEBUG] Found asset: {asset.get('name')}")
             if "source code" in aname or "source code" in alabel:
+                print(f"[DEBUG] Skipped 'source code' asset: {asset.get('name')}")
                 continue
             clean_name = strip_extension(asset["name"])
-            caption = f"⬇️ <b>{clean_name}</b> from <b>{repo_only}</b> {tag}"
+            caption = f"⬇️ <b>{clean_name}</b> from <b>{repo_only}</b> {release['tag_name']}"
             headers = {'Authorization': f'token {GITHUB_TOKEN}'} if GITHUB_TOKEN else {}
-            async with aiohttp.ClientSession() as s:
-                async with s.get(asset["browser_download_url"], headers=headers) as r:
-                    file_bytes = await r.read()
-            if len(file_bytes) > 49_000_000:
-                continue
-            await context.bot.send_document(
-                chat_id=CHANNEL,
-                document=(asset["name"], file_bytes),
-                caption=caption,
-                parse_mode="HTML"
-            )
+            try:
+                async with aiohttp.ClientSession() as s:
+                    async with s.get(asset["browser_download_url"], headers=headers) as r:
+                        file_bytes = await r.read()
+                if len(file_bytes) > 49_000_000:
+                    print(f"[DEBUG] Skipping {asset['name']} (too large for Telegram upload)")
+                    continue
+                await context.bot.send_document(
+                    chat_id=CHANNEL,
+                    document=(asset["name"], file_bytes),
+                    caption=caption,
+                    parse_mode="HTML"
+                )
+                print(f"[DEBUG] Uploaded asset: {asset.get('name')}")
+            except Exception as e:
+                print(f"[ERROR] Failed to upload {asset.get('name')} : {str(e)}")
+                await context.bot.send_message(chat_id=CHANNEL, text=f"Failed to send `{asset.get('name')}`: {e}")
 
 async def handle_add(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message = update.message
@@ -162,9 +168,7 @@ async def cmd_list(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = "📋 <b>Tracked Repositories:</b>\n" + "\n".join(f"- <b>{r}</b>" for r in tracked)
     await update.message.reply_text(msg, parse_mode="HTML")
 
-#
-# /releases supports inline pagination
-#
+# /releases with inline pagination if too many
 async def cmd_releases(update: Update, context: ContextTypes.DEFAULT_TYPE):
     tracked = load_tracked()
     if not tracked:
@@ -197,14 +201,11 @@ async def show_releases_page(update, context, tracked, page_idx):
     if end < len(tracked):
         nav_buttons.append(InlineKeyboardButton("Next ➡️", callback_data=f"rel_page:{page_idx+1}"))
     reply_markup = InlineKeyboardMarkup([nav_buttons] if nav_buttons else [])
-    if update.message:
+    if getattr(update, 'message', None):
         await update.message.reply_text(msg, parse_mode="HTML", reply_markup=reply_markup)
     else:  # editing prev page
         await update.callback_query.edit_message_text(msg, parse_mode="HTML", reply_markup=reply_markup)
 
-#
-# Pagination handler for /releases inline keyboard
-#
 async def cb_rel_page(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
