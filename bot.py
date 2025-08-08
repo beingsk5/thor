@@ -20,7 +20,7 @@ BOT_TOKEN = os.environ['BOT_TOKEN']
 GITHUB_TOKEN = os.environ.get('GITHUB_TOKEN', '')
 TELEGRAM_API_URL = f'https://api.telegram.org/bot{BOT_TOKEN}/sendDocument'
 
-RELEASES_PAGE_SIZE = 15   # Adjust as desired
+RELEASES_PAGE_SIZE = 15
 
 def get_repo_name(input_str):
     m = re.search(r'([\w-]+)/([\w\-.]+)', input_str)
@@ -57,7 +57,6 @@ async def fetch_latest_release(session, repo):
             return releases[0]
         return None
 
-# ─── Poll-script style file uploader (API direct) ───
 async def telegram_file_upload(file_bytes, filename, caption, parse_mode='HTML'):
     from aiohttp import FormData
     data = FormData()
@@ -69,15 +68,14 @@ async def telegram_file_upload(file_bytes, filename, caption, parse_mode='HTML')
         async with session.post(TELEGRAM_API_URL, data=data) as resp:
             text = await resp.text()
             if resp.status != 200 or '"ok":false' in text:
-                print(f"[ERROR] Telegram file upload failed: {resp.status} / {text}")
+                print(f"[ERROR] File upload failed: {resp.status} / {text}")
                 return False
-    print(f"[DEBUG] Telegram sent file {filename}")
+    print(f"[DEBUG] Sent file {filename}")
     return True
 
-# --- Unified notification: repo name only, then files ---
 async def send_channel_notification(context, release, repo, notify_assets=True):
     tag = release['tag_name']
-    date_str = (datetime.fromisoformat(release["published_at"].replace("Z", "+00:00")).strftime('%Y-%m-%d')) if 'published_at' in release else ''
+    date_str = (datetime.fromisoformat(release.get("published_at", "1970-01-01T00:00:00Z").replace("Z", "+00:00")).strftime('%Y-%m-%d'))
     changelog = (release.get('body') or '').replace('<', '&lt;').replace('>', '&gt;')
     changelog = (changelog[:300] + "…") if len(changelog) > 300 else changelog
     name = release.get("name") or ""
@@ -100,30 +98,29 @@ async def send_channel_notification(context, release, repo, notify_assets=True):
             [InlineKeyboardButton("⬇️ View Release", url=release['html_url'])]
         ])
     )
-    # -- Asset handling, "works like poll_github.py" --
     if notify_assets:
         for asset in release.get("assets", []):
             aname = (asset.get("name") or "").lower()
             alabel = (asset.get("label") or "").lower()
             print(f"[DEBUG] Found asset: {asset.get('name')}")
             if "source code" in aname or "source code" in alabel:
-                print(f"[DEBUG] Skipped 'source code' asset: {asset.get('name')}")
+                print(f"[DEBUG] Skipped source code asset: {asset.get('name')}")
                 continue
-            clean_name = strip_extension(asset.get("name") or "")
-            caption = f"⬇️ <b>{clean_name}</b> from <b>{repo_only}</b> {release['tag_name']}"
+            caption = f"⬇️ {repo_only} {tag}"
             headers = {'Authorization': f'token {GITHUB_TOKEN}'} if GITHUB_TOKEN else {}
             try:
                 async with aiohttp.ClientSession() as s:
                     async with s.get(asset["browser_download_url"], headers=headers) as r:
                         file_bytes = await r.read()
                 if len(file_bytes) > 49_000_000:
-                    print(f"[DEBUG] Skipping {asset.get('name')} (too large for Telegram upload)")
+                    print(f"[DEBUG] Skipped {asset.get('name')} (too large for upload)")
                     continue
                 ok = await telegram_file_upload(BytesIO(file_bytes), asset.get("name"), caption)
                 if not ok:
                     await context.bot.send_message(chat_id=CHANNEL, text=f"Failed to send `{asset.get('name')}`")
+                print(f"[DEBUG] Uploaded asset: {asset.get('name')}")
             except Exception as e:
-                print(f"[ERROR] Failed to upload {asset.get('name')} : {str(e)}")
+                print(f"[ERROR] Failed upload {asset.get('name')} : {str(e)}")
                 await context.bot.send_message(chat_id=CHANNEL, text=f"Failed to send `{asset.get('name')}`: {e}")
 
 async def handle_add(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -191,15 +188,25 @@ async def cmd_releases(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def show_releases_page(update, context, tracked, page_idx):
     PAGE_SIZE = RELEASES_PAGE_SIZE
+    # Fetch all latest release objects for tracked repos
+    async with aiohttp.ClientSession() as session:
+        tasks = [fetch_latest_release(session, repo) for repo in tracked]
+        releases_list = await asyncio.gather(*tasks)
+    # Pair repos and releases, sort by release date (newest first)
+    repo_release_pairs = []
+    for repo, rel in zip(tracked, releases_list):
+        # Use 0 date for missing releases so they go last
+        timestamp = rel["published_at"] if rel and "published_at" in rel else "0000-00-00T00:00:00Z"
+        repo_release_pairs.append((timestamp, repo, rel))
+    # Sort by timestamp descending (newest first)
+    repo_release_pairs.sort(reverse=True, key=lambda x: x[0])
+    # Apply pagination
     start = page_idx * PAGE_SIZE
     end = start + PAGE_SIZE
-    subset = tracked[start:end]
-    text_title = f"📦 <b>Latest releases ({start+1}-{min(end, len(tracked))} / {len(tracked)})</b>\n\n"
-    async with aiohttp.ClientSession() as session:
-        tasks = [fetch_latest_release(session, repo) for repo in subset]
-        releases_list = await asyncio.gather(*tasks)
+    subset = repo_release_pairs[start:end]
+    text_title = f"📦 <b>Latest releases ({start+1}-{min(end, len(repo_release_pairs))} / {len(repo_release_pairs)})</b>\n\n"
     msg = text_title
-    for repo, rel in zip(subset, releases_list):
+    for timestamp, repo, rel in subset:
         if rel:
             tag = rel.get("tag_name", "")
             date = rel.get("published_at", "")[:10]
@@ -210,12 +217,12 @@ async def show_releases_page(update, context, tracked, page_idx):
     nav_buttons = []
     if page_idx > 0:
         nav_buttons.append(InlineKeyboardButton("⬅️ Back", callback_data=f"rel_page:{page_idx-1}"))
-    if end < len(tracked):
+    if end < len(repo_release_pairs):
         nav_buttons.append(InlineKeyboardButton("Next ➡️", callback_data=f"rel_page:{page_idx+1}"))
     reply_markup = InlineKeyboardMarkup([nav_buttons] if nav_buttons else [])
     if getattr(update, 'message', None):
         await update.message.reply_text(msg, parse_mode="HTML", reply_markup=reply_markup)
-    else:  # editing prev page
+    else:
         await update.callback_query.edit_message_text(msg, parse_mode="HTML", reply_markup=reply_markup)
 
 async def cb_rel_page(update: Update, context: ContextTypes.DEFAULT_TYPE):
