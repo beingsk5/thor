@@ -191,19 +191,29 @@ async def releases_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await show_releases_page(update, context, page=0)
 
 async def show_releases_page(update, context, page=0):
-    repos = context.user_data.get('release_repos')
-    if not repos:
-        repos, _ = load_tracked()
+    repos = context.user_data.get('release_repos', [])
     releases_info = []
     for repo in repos:
-        resp = requests.get(f"https://api.github.com/repos/{repo}/releases")
-        releases = resp.json() if resp.ok else []
-        if releases:
-            rel = releases[0]
-            rel_date = datetime.fromisoformat(rel["published_at"].replace("Z", "+00:00"))
-            releases_info.append((rel_date, repo, rel))
-        else:
+        url = f"https://api.github.com/repos/{repo}/releases"
+        try:
+            resp = requests.get(url)
+            if not resp.ok:
+                releases_info.append((datetime.min.replace(tzinfo=timezone.utc), repo, None))
+                continue
+            releases = resp.json()
+            found_release = None
+            for rel in releases:
+                if rel.get("published_at") and rel.get("tag_name"):
+                    found_release = rel
+                    break
+            if found_release:
+                rel_date = datetime.fromisoformat(found_release["published_at"].replace("Z", "+00:00"))
+                releases_info.append((rel_date, repo, found_release))
+            else:
+                releases_info.append((datetime.min.replace(tzinfo=timezone.utc), repo, None))
+        except Exception:
             releases_info.append((datetime.min.replace(tzinfo=timezone.utc), repo, None))
+
     releases_info.sort(reverse=True, key=lambda x: x[0])
 
     page_size = RELEASES_PAGE_SIZE
@@ -215,7 +225,7 @@ async def show_releases_page(update, context, page=0):
     msg = f"📦 <b>Latest releases ({start+1}-{end}/{total})</b>\n\n"
     for rel_date, repo, rel in subset:
         if not rel:
-            msg += f"🔸 {repo}: No releases found.\n"
+            msg += f"🔸 {repo}: <i>No actual releases found.</i>\n"
         else:
             date_str = rel_date.strftime('%Y-%m-%d')
             msg += f"🔹 <b>{repo}</b>: <code>{rel['tag_name']}</code> ({date_str})\n"
@@ -255,7 +265,14 @@ async def notify_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not releases:
         await update.message.reply_text("No releases found for this repo.")
         return
-    latest = releases[0]
+    latest = None
+    for rel in releases:
+        if rel.get("published_at") and rel.get("tag_name"):
+            latest = rel
+            break
+    if latest is None:
+        await update.message.reply_text("No valid releases found.")
+        return
     repo_only = repo.split('/')[-1]
     tag = latest.get('tag_name', '')
     notes = (latest.get("body") or '').replace('<', "&lt;").replace('>', "&gt;")
@@ -283,7 +300,6 @@ async def notify_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
             file_bytes = BytesIO(resp.content)
             file_bytes.name = asset.get("name", "asset.bin")
             await update.message.reply_document(document=InputFile(file_bytes), caption=caption, parse_mode="HTML")
-        # else skip large files without feedback
 
 async def clearall_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
