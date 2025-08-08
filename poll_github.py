@@ -13,18 +13,12 @@ def get_repo_name(full_repo):
     # Extract repo name from "user/repo"
     return full_repo.split("/")[-1]
 
-def strip_extension(filename):
-    # Removes last extension from filename
-    if '.' in filename:
-        return '.'.join(filename.split('.')[:-1])
-    return filename
-
 def send_telegram_message(text, btn_url=None):
     json_body = {
         'chat_id': CHANNEL,
         'text': text,
         'parse_mode': 'HTML',
-        'disable_web_page_preview': True  # Prevents embedded link preview in Telegram
+        'disable_web_page_preview': True
     }
     if btn_url:
         json_body['reply_markup'] = {
@@ -36,14 +30,12 @@ def send_telegram_message(text, btn_url=None):
     )
 
 def send_telegram_file(asset_url, filename, repo, tag):
-    # Download asset and send as document, with no extension and no user/ prefix
     token = os.environ.get("GITHUB_TOKEN", "")
     headers = {'Authorization': f'token {token}'} if token else {}
     r = requests.get(asset_url, headers=headers, stream=True)
     file_data = r.content
-    clean_name = strip_extension(filename)
     repo_only = get_repo_name(repo)
-    caption = f"⬇️ <b>{clean_name}</b> from <b>{repo_only}</b> {tag}"
+    caption = f"⬇️ {repo_only} {tag}"  
     resp = requests.post(
         f'https://api.telegram.org/bot{BOT_TOKEN}/sendDocument',
         data={
@@ -91,7 +83,7 @@ def main():
             text += "\n⬇️ <b>Download below</b>:"
             send_telegram_message(text, btn_url=latest["html_url"])
 
-            # Send all non-"source code" assets as files with stripped extension & repo name only
+            # Send all non-"source code" assets as files with the updated caption!
             for asset in latest.get("assets", []):
                 asset_name = (asset.get("name") or "").lower()
                 asset_label = (asset.get("label") or "").lower()
@@ -104,7 +96,7 @@ def main():
             notified[repo] = str(latest['id'])
     with open(NOTIFIED_FILE, 'w') as f:
         json.dump(notified, f, indent=2)
-    # badge update 
+    # badge update
     os.makedirs('badge', exist_ok=True)
     with open(BADGE_FILE, 'w') as f:
         json.dump({
