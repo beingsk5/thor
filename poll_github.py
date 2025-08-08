@@ -14,7 +14,7 @@ def send_telegram_message(text, btn_url=None):
         'chat_id': CHANNEL,
         'text': text,
         'parse_mode': 'HTML',
-        'disable_web_page_preview': False
+        'disable_web_page_preview': True
     }
     if btn_url:
         json_body['reply_markup'] = {
