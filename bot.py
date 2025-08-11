@@ -3,14 +3,12 @@ import re
 import json
 import requests
 from datetime import datetime, timezone
-import matplotlib.pyplot as plt
-from io import BytesIO
 from telegram import (
-    Update, ReplyKeyboardMarkup, InputFile,
-    InlineKeyboardButton, InlineKeyboardMarkup
+    Update, ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup, InputFile
 )
 from telegram.ext import (
-    ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes, CallbackQueryHandler
+    ApplicationBuilder, CommandHandler, MessageHandler, filters,
+    ContextTypes, CallbackQueryHandler
 )
 
 BOT_TOKEN = os.environ['BOT_TOKEN']
@@ -19,6 +17,7 @@ GITHUB_REPO = os.environ['GITHUB_REPO']
 GITHUB_TOKEN = os.environ['GITHUB_TOKEN']
 ADMIN_ID = int(os.environ.get("ADMIN_ID", "123456"))
 DATA_PATH = "data/tracked.json"
+CHANNEL = os.environ.get("CHANNEL", "@yourchannel")  # Your target channel username or ID
 RELEASES_PAGE_SIZE = 15
 
 def github_headers():
@@ -80,9 +79,9 @@ async def help_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "/add <repo(s)> — Add one or more repos (url or username/repo)\n"
         "/remove <repo> — Remove a tracked repo\n"
         "/list — Show tracked repos\n"
-        "/releases — Show recent releases (paged, newest to oldest)\n"
+        "/releases — Show recent releases (personal chat only)\n"
         "/notify <repo> — Notify channel about latest release\n"
-        "/chart — Release chart\n"
+        "/chart — Release chart (text format)\n"
         "/about — About\n"
         "/clearall — Clear all (admin)\n"
         "/ping — Check bot is alive"
@@ -181,12 +180,16 @@ async def list_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "📋 Tracked repos:\n" + "\n".join(f"- `{r}`" for r in repos), parse_mode="Markdown"
     )
 
+# --- RELEASES paging, only for personal chat ---
 async def releases_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # Only allow in private chat (type == "private")
+    if update.effective_chat.type != "private":
+        await update.message.reply_text("⚠️ /releases command works only in personal/private chat.")
+        return
     repos, _ = load_tracked()
     if not repos:
         await update.message.reply_text("No tracked repositories. Add some first.")
         return
-    # Build and cache all releases info for paging
     releases_info = []
     for repo in repos:
         url = f"https://api.github.com/repos/{repo}/releases"
@@ -210,11 +213,13 @@ async def releases_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
             releases_info.append((datetime.min.replace(tzinfo=timezone.utc), repo, None))
 
     releases_info.sort(reverse=True, key=lambda x: x[0])
-    context.user_data['releases_info'] = releases_info
+    chat_id = update.effective_chat.id
+    context.bot_data[f'releases_info_{chat_id}'] = releases_info
     await show_releases_page(update, context, page=0)
 
 async def show_releases_page(update, context, page=0):
-    releases_info = context.user_data.get('releases_info', [])
+    chat_id = update.effective_chat.id
+    releases_info = context.bot_data.get(f'releases_info_{chat_id}', [])
     page_size = RELEASES_PAGE_SIZE
     total = len(releases_info)
     start = page * page_size
@@ -234,7 +239,6 @@ async def show_releases_page(update, context, page=0):
     if end < total:
         nav_buttons.append(InlineKeyboardButton("Next ➡️", callback_data=f"rel_page:{page+1}"))
     reply_markup = InlineKeyboardMarkup([nav_buttons] if nav_buttons else [])
-
     if getattr(update, 'message', None):
         await update.message.reply_text(msg, parse_mode="HTML", reply_markup=reply_markup)
     else:
@@ -247,6 +251,7 @@ async def releases_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     page = int(page_match.group(1)) if page_match else 0
     await show_releases_page(update, context, page)
 
+# --- /notify now sends notification and files to channel with button ---
 async def notify_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not context.args:
         await update.message.reply_text("Usage: /notify <repo>")
@@ -283,7 +288,14 @@ async def notify_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if note1:
         text += f"\n📝 <b>Changelog:</b>\n{note1}\n"
     text += "\n⬇️ <b>Download below</b>:"
-    await update.message.reply_text(text, parse_mode="HTML", disable_web_page_preview=True)
+
+    # Inline button "GitHub Repo"
+    reply_markup = InlineKeyboardMarkup(
+        [[InlineKeyboardButton("GitHub Repo", url=latest["html_url"])]]
+    )
+
+    await context.bot.send_message(chat_id=CHANNEL, text=text, parse_mode="HTML", disable_web_page_preview=True, reply_markup=reply_markup)
+
     for asset in latest.get("assets", []):
         asset_name = (asset.get("name") or "").lower()
         asset_label = (asset.get("label") or "").lower()
@@ -295,16 +307,10 @@ async def notify_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if resp.ok and len(resp.content) <= 49_000_000:
             file_bytes = BytesIO(resp.content)
             file_bytes.name = asset.get("name", "asset.bin")
-            await update.message.reply_document(document=InputFile(file_bytes), caption=caption, parse_mode="HTML")
+            await context.bot.send_document(chat_id=CHANNEL, document=InputFile(file_bytes),
+                                           caption=caption, parse_mode="HTML")
 
-async def clearall_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.effective_user.id != ADMIN_ID:
-        await update.message.reply_text("❌ Only admin can clear all repos!")
-        return
-    _, sha = load_tracked()
-    save_tracked([], sha)
-    await update.message.reply_text("☑️ All repos cleared.")
-
+# --- /chart (text only) ---
 async def chart_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     repos, _ = load_tracked()
     if not repos:
@@ -328,16 +334,18 @@ async def chart_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("No release history yet.")
         return
     months = sorted(release_counts)
-    values = [release_counts[m] for m in months]
-    plt.figure(figsize=(6,3))
-    plt.bar(months, values)
-    plt.xticks(rotation=30, ha='right')
-    plt.title("Releases per Month")
-    plt.tight_layout()
-    chart_img = BytesIO()
-    plt.savefig(chart_img, format='png')
-    chart_img.seek(0)
-    await update.message.reply_photo(photo=InputFile(chart_img, filename="releases.png"))
+    msg = "📊 <b>Release count per month:</b>\n"
+    for m in months:
+        msg += f"{m}: {release_counts[m]}\n"
+    await update.message.reply_text(msg, parse_mode="HTML")
+
+async def clearall_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != ADMIN_ID:
+        await update.message.reply_text("❌ Only admin can clear all repos!")
+        return
+    _, sha = load_tracked()
+    save_tracked([], sha)
+    await update.message.reply_text("☑️ All repos cleared.")
 
 if __name__ == '__main__':
     app = ApplicationBuilder().token(BOT_TOKEN).build()
