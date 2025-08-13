@@ -15,7 +15,7 @@ BOT_TOKEN = os.environ['BOT_TOKEN']
 GITHUB_OWNER = os.environ['GITHUB_OWNER']
 GITHUB_REPO = os.environ['GITHUB_REPO']
 GITHUB_TOKEN = os.environ['GITHUB_TOKEN']
-CHANNEL = os.environ.get("CHANNEL", "@yourchannel")
+TELEGRAM_CHANNEL = os.environ.get("TELEGRAM_CHANNEL", "@yourchannel")
 ADMIN_ID = int(os.environ.get("ADMIN_ID", "123456"))
 DATA_PATH = "data/tracked.json"
 RELEASES_PAGE_SIZE = 15
@@ -180,7 +180,7 @@ async def list_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "📋 Tracked repos:\n" + "\n".join(f"- `{r}`" for r in repos), parse_mode="Markdown"
     )
 
-# --- RELEASES: Fetches every repo, in personal chat only, paged ---
+# --- RELEASES: For personal chat only, paged, newest to oldest, fetches every repo ---
 async def releases_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_chat.type != "private":
         await update.message.reply_text("⚠️ /releases works only in your personal chat with the bot.")
@@ -248,7 +248,7 @@ async def releases_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     page = int(page_match.group(1)) if page_match else 0
     await show_releases_page(update, context, page)
 
-# --- /notify: Notifies in channel like poll_github.py, with button and files ---
+# --- /notify posts notification and files to TELEGRAM_CHANNEL, like poll_github.py ---
 async def notify_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not context.args:
         await update.message.reply_text("Usage: /notify <repo>")
@@ -286,7 +286,7 @@ async def notify_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         text += f"\n📝 <b>Changelog:</b>\n{note1}\n"
     text += "\n⬇️ <b>Download below</b>:"
     reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("GitHub Repo", url=latest["html_url"])]])
-    await context.bot.send_message(chat_id=CHANNEL, text=text, parse_mode="HTML", disable_web_page_preview=True, reply_markup=reply_markup)
+    await context.bot.send_message(chat_id=TELEGRAM_CHANNEL, text=text, parse_mode="HTML", disable_web_page_preview=True, reply_markup=reply_markup)
     for asset in latest.get("assets", []):
         asset_name = (asset.get("name") or "").lower()
         asset_label = (asset.get("label") or "").lower()
@@ -298,7 +298,7 @@ async def notify_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if resp.ok and len(resp.content) <= 49_000_000:
             file_bytes = BytesIO(resp.content)
             file_bytes.name = asset.get("name", "asset.bin")
-            await context.bot.send_document(chat_id=CHANNEL, document=InputFile(file_bytes),
+            await context.bot.send_document(chat_id=TELEGRAM_CHANNEL, document=InputFile(file_bytes),
                                            caption=caption, parse_mode="HTML")
 
 async def chart_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
