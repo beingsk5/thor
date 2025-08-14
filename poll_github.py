@@ -58,28 +58,33 @@ def save_json(file_path, obj):
     with open(file_path, 'w') as f:
         json.dump(obj, f, indent=2)
 
-def get_best_release(releases):
-    """Return the most recent valid release (with tag_name and published_at)."""
+def get_latest_valid_release(releases):
+    # Returns most recent published release (not draft/prerelease) with tag and published date
     for rel in releases:
+        if rel.get('draft') or rel.get('prerelease'):
+            continue
         tag = rel.get("tag_name", "")
         pub = rel.get("published_at", "")
         if tag and pub:
             try:
                 rel_date = datetime.fromisoformat(pub.replace("Z", "+00:00")).date()
+                return tag, rel_date.strftime("%Y-%m-%d"), rel
             except Exception:
-                rel_date = None
-            if rel_date:
-                return tag, rel_date.strftime("%Y-%m-%d")
-    return "none", ""
+                continue
+    # If no valid releases, fallback
+    return "none", "", None
 
-def fetch_latest_release(repo):
+def fetch_latest_release_entry(repo):
     url = f'https://api.github.com/repos/{repo}/releases'
-    r = requests.get(url)
-    if not r.ok:
+    try:
+        r = requests.get(url)
+        if not r.ok:
+            return {"repo": repo, "tag": "none", "date": ""}
+        releases = r.json()
+        tag, date_str, _ = get_latest_valid_release(releases)
+        return {"repo": repo, "tag": tag, "date": date_str}
+    except Exception:
         return {"repo": repo, "tag": "none", "date": ""}
-    releases = r.json()
-    tag, date_str = get_best_release(releases)
-    return {"repo": repo, "tag": tag, "date": date_str}
 
 def main():
     today = datetime.now(timezone.utc).date()
@@ -88,49 +93,49 @@ def main():
     notified = load_json_or_default(NOTIFIED_FILE, {})
     all_releases = []
 
-    # 1. Telegram notifications for new releases (unchanged)
     for repo in tracked.get('repos', []):
         url = f'https://api.github.com/repos/{repo}/releases'
-        r = requests.get(url)
-        if not r.ok:
-            continue
-        releases = r.json()
-        # Use get_best_release on all releases, not just the first
-        tag, rel_date_str = get_best_release(releases)
-        latest = next((rel for rel in releases if rel.get("tag_name", "") == tag and rel.get("published_at", "")), None)
+        try:
+            r = requests.get(url)
+            if not r.ok:
+                releases = []
+            else:
+                releases = r.json()
+        except Exception:
+            releases = []
 
-        # Only proceed if we found a valid release
+        tag, rel_date_str, latest = get_latest_valid_release(releases)
+        # Only send notification if a new valid release is found and within last two days
         if latest and rel_date_str:
             rel_date = datetime.strptime(rel_date_str, "%Y-%m-%d").date()
-            if rel_date is None or rel_date < yesterday:
-                continue
-            if str(latest['id']) != str(notified.get(repo, '')):
-                notes = (latest.get("body") or '').replace('<', "&lt;").replace('>', "&gt;")
-                note1 = (notes[:300] + "…") if notes and len(notes) > 300 else notes
-                text = (
-                    f"🆕 <b>{repo}</b> just published a new release!\n"
-                    f"🔖 <b>{tag}</b> <code>({rel_date_str})</code>\n"
-                )
-                if latest.get('name'):
-                    text += f"\n🚀 <b>Release name:</b> {latest.get('name','')}\n"
-                if note1:
-                    text += f"\n📝 <b>Changelog:</b>\n{note1}\n"
-                text += "\n⬇️ <b>Download below</b>:"
-                send_telegram_message(text, btn_url=latest["html_url"])
-
-                repo_only = repo.split('/')[-1]
-                for asset in latest.get("assets", []):
-                    asset_name = (asset.get("name") or "").lower()
-                    asset_label = (asset.get("label") or "").lower()
-                    if "source code" in asset_name or "source code" in asset_label:
-                        continue
-                    caption = f"⬇️ {repo_only} {tag}"
-                    send_telegram_file(
-                        asset["browser_download_url"], asset["name"], caption=caption
+            if rel_date >= yesterday:
+                if str(latest['id']) != str(notified.get(repo, '')):
+                    notes = (latest.get("body") or '').replace('<', "&lt;").replace('>', "&gt;")
+                    note1 = (notes[:300] + "…") if notes and len(notes) > 300 else notes
+                    text = (
+                        f"🆕 <b>{repo}</b> just published a new release!\n"
+                        f"🔖 <b>{tag}</b> <code>({rel_date_str})</code>\n"
                     )
-                notified[repo] = str(latest['id'])
+                    if latest.get('name'):
+                        text += f"\n🚀 <b>Release name:</b> {latest.get('name','')}\n"
+                    if note1:
+                        text += f"\n📝 <b>Changelog:</b>\n{note1}\n"
+                    text += "\n⬇️ <b>Download below</b>:"
+                    send_telegram_message(text, btn_url=latest["html_url"])
 
-        # Keep a consistent log in releases.json for every repo (even if no releases)
+                    repo_only = repo.split('/')[-1]
+                    for asset in latest.get("assets", []):
+                        asset_name = (asset.get("name") or "").lower()
+                        asset_label = (asset.get("label") or "").lower()
+                        if "source code" in asset_name or "source code" in asset_label:
+                            continue
+                        caption = f"⬇️ {repo_only} {tag}"
+                        send_telegram_file(
+                            asset["browser_download_url"], asset["name"], caption=caption
+                        )
+                    notified[repo] = str(latest['id'])
+
+        # Always record every repo with latest release info (even none)
         all_releases.append({
             "repo": repo,
             "tag": tag,
@@ -140,7 +145,7 @@ def main():
     save_json(NOTIFIED_FILE, notified)
     save_json(RELEASES_FILE, all_releases)
 
-    # 3. Badge update (unchanged)
+    # Badge update
     os.makedirs('badge', exist_ok=True)
     with open(BADGE_FILE, 'w') as f:
         json.dump({
