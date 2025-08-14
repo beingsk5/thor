@@ -1,7 +1,437 @@
 [
   {
+    "repo": "JingMatrix/LSPosed",
+    "tag": "v1.10.2",
+    "date": "2025-07-12"
+  },
+  {
+    "repo": "AloozChips/OneUIEmojiPack",
+    "tag": "v7.1",
+    "date": "2025-06-14"
+  },
+  {
+    "repo": "Mahmud0808/Iconify",
+    "tag": "v7.2.0",
+    "date": "2025-03-02"
+  },
+  {
+    "repo": "Dev4Mod/WaEnhancer",
+    "tag": "debug-3688f004",
+    "date": "2025-08-09"
+  },
+  {
+    "repo": "osm0sis/PlayIntegrityFork",
+    "tag": "v14",
+    "date": "2025-07-29"
+  },
+  {
+    "repo": "JingMatrix/NeoZygisk",
+    "tag": "v1.2",
+    "date": "2025-07-31"
+  },
+  {
+    "repo": "KOWX712/Tricky-Addon-Update-Target-List",
+    "tag": "v4.1",
+    "date": "2025-07-25"
+  },
+  {
+    "repo": "Pixel-Props/BetterKnownInstalled",
+    "tag": "1337",
+    "date": "2025-02-06"
+  },
+  {
+    "repo": "5ec1cff/TrickyStore",
+    "tag": "1.3.0",
+    "date": "2025-06-18"
+  },
+  {
+    "repo": "j-hc/zygisk-detach-app",
+    "tag": "v1.3",
+    "date": "2025-04-15"
+  },
+  {
+    "repo": "Dr-TSNG/ZygiskNext",
+    "tag": "v1.2.9.1",
+    "date": "2025-07-16"
+  },
+  {
+    "repo": "reveny/Android-VBMeta-Fixer",
+    "tag": "v1.2.0",
+    "date": "2025-05-10"
+  },
+  {
+    "repo": "d4rken-org/sdmaid-se",
+    "tag": "v1.4.15-rc0",
+    "date": "2025-07-03"
+  },
+  {
+    "repo": "snake-4/Zygisk-Assistant",
+    "tag": "v2.1.4",
+    "date": "2025-02-23"
+  },
+  {
+    "repo": "vvb2060/KeyAttestation",
+    "tag": "v1.8.4",
+    "date": "2025-01-16"
+  },
+  {
+    "repo": "j-hc/zygisk-detach",
+    "tag": "v1.20.1",
+    "date": "2025-06-01"
+  },
+  {
+    "repo": "LSPosed/LSPosed.github.io",
+    "tag": "shamiko-414",
+    "date": "2025-06-18"
+  },
+  {
+    "repo": "EricInacio01/PlayIntegrityFix-NEXT",
+    "tag": "v3.0-release",
+    "date": "2025-08-09"
+  },
+  {
+    "repo": "ZG089/Re-Malwack",
+    "tag": "v6.0",
+    "date": "2025-03-31"
+  },
+  {
+    "repo": "chsbuffer/ReVancedXposed",
+    "tag": "1.0.23",
+    "date": "2025-07-19"
+  },
+  {
+    "repo": "PerformanC/ReZygisk",
+    "tag": "v1.0.0-rc.3",
+    "date": "2025-07-14"
+  },
+  {
+    "repo": "dpejoh/yurikey",
+    "tag": "v1.71",
+    "date": "2025-07-15"
+  },
+  {
+    "repo": "MhmRdd/NoHello",
+    "tag": "0.0.7",
+    "date": "2025-05-31"
+  },
+  {
+    "repo": "chenxiaolong/BCR",
+    "tag": "v1.79",
+    "date": "2025-07-26"
+  },
+  {
+    "repo": "re-zero001/LSPosed-Irena",
+    "tag": "1.9.2",
+    "date": "2024-10-17"
+  },
+  {
+    "repo": "j-hc/FlagSecurePatcher",
+    "tag": "r15",
+    "date": "2025-04-03"
+  },
+  {
+    "repo": "sidex15/susfs4ksu-module",
+    "tag": "v1.5.2+_R20",
+    "date": "2025-07-06"
+  },
+  {
+    "repo": "Dr-TSNG/Hide-My-Applist",
+    "tag": "V3.5",
+    "date": "2025-06-28"
+  },
+  {
+    "repo": "pumPCin/HMAL",
+    "tag": "V4.1.1.r62",
+    "date": "2024-12-23"
+  },
+  {
+    "repo": "siavash79/PixelXpert",
+    "tag": "v4.3.0",
+    "date": "2025-06-09"
+  },
+  {
+    "repo": "KOWX712/PlayIntegrityFix",
+    "tag": "v19.2",
+    "date": "2025-07-13"
+  },
+  {
     "repo": "mikropsoft/StevenBlock",
     "tag": "v1.9.7",
     "date": "2025-08-14"
+  },
+  {
+    "repo": "bindhosts/bindhosts",
+    "tag": "v2.0.6",
+    "date": "2025-07-17"
+  },
+  {
+    "repo": "pantsufan/BlockAds",
+    "tag": "v2.45",
+    "date": "2025-08-01"
+  },
+  {
+    "repo": "Vaz15k/Cubic-AdBlock",
+    "tag": "v2.62",
+    "date": "2025-08-11"
+  },
+  {
+    "repo": "hujiayucc/Fuck-AD",
+    "tag": "2.0.4.1",
+    "date": "2025-08-05"
+  },
+  {
+    "repo": "Magisk-Modules-Alt-Repo/systemless-adblocker",
+    "tag": "1.11",
+    "date": "2025-02-22"
+  },
+  {
+    "repo": "symbuzzer/systemless-hosts-KernelSU-module",
+    "tag": "v1.2.0",
+    "date": "2025-02-15"
+  },
+  {
+    "repo": "NeoApplications/Neo-Store",
+    "tag": "1.1.0",
+    "date": "2025-07-31"
+  },
+  {
+    "repo": "Droid-ify/client",
+    "tag": "v0.6.6",
+    "date": "2025-07-06"
+  },
+  {
+    "repo": "Tornaco/Thanox",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "revenge-mod/revenge-xposed",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "ReSo7200/InstaEclipse",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "Magisk-Modules-Alt-Repo/audio-jitter-silencer",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "Magisk-Modules-Alt-Repo/audio-misc-settings",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "Magisk-Modules-Alt-Repo/audio-samplerate-changer",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "auag0/DisableAudioFocus",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "james34602/JamesDSPManager",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "Briclyaz/NLSound_module_QCom",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "WSTxda/ViperFX-RE-Releases",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "Xposed-Modules-Repo/io.github.wzhy.xaudiocapture",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "XayahSuSuSu/Android-DataBackup",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "UNKNUW/Background-App-Slayer",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "Skyghost090/Extreme-Gms-Doze",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "NoWakeLock/NoWakeLock",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "araafroyall/Cleaner-Royall",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "Magisk-Modules-Alt-Repo/video-to-bootanimation",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "Keinta15/Magisk-iOS-Emoji",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "Mahmud0808/PixelLauncherEnhanced",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "KieronQuinn/PixelLauncherMods",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "zacharee/Tweaker",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "Mahmud0808/ColorBlendr",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "RichardLuo0/global-icon-pack-android",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "xfqwdsj/IAmNotADeveloper",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "Magisk-Modules-Alt-Repo/chroot-distro",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "RikkaApps/Shizuku",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "mgksu/dockerd",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "FurLC/ZRAM-Module",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "AnsahMohammad/shots-studio",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "Drsexo/Greenify4Magisk-KSU-Reborn",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "FossifyOrg/File-Manager",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "zhanghai/MaterialFiles",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "fatalcoder524/KernelFlasher",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "reveny/Android-Native-Root-Detector",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "Magisk-Modules-Alt-Repo/abootloop",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "Magisk-Modules-Alt-Repo/YetAnotherBootloopProtector",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "Domi04151309/AlwaysOn",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "99keshav99/CaptureSposed",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "ahmedmani/pairipfix",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "LSPosed/CorePatch",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "PranavPurwar/AppLock",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "beakthoven/TrickyStore",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "ineffablexd/Ineffable-Hub",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "Doze-off/Hide-folders-files",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "Mino260806/KeyboardGPT",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "Magisk-Modules-Repo/callrecorder-skvalex",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "Goooler/LawnchairRelease",
+    "tag": "none",
+    "date": ""
   }
 ]
