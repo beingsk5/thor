@@ -58,21 +58,31 @@ def save_json(file_path, obj):
     with open(file_path, 'w') as f:
         json.dump(obj, f, indent=2)
 
+def fetch_latest_release(repo):
+    url = f'https://api.github.com/repos/{repo}/releases'
+    r = requests.get(url)
+    if not r.ok:
+        return {"repo": repo, "tag": "none", "date": ""}
+    releases = r.json()
+    for rel in releases:
+        if rel.get("published_at") and rel.get("tag_name"):
+            rel_date = datetime.fromisoformat(rel["published_at"].replace("Z", "+00:00")).date()
+            return {
+                "repo": repo,
+                "tag": rel.get("tag_name"),
+                "date": rel_date.strftime("%Y-%m-%d")
+            }
+    # No releases, fallback
+    return {"repo": repo, "tag": "none", "date": ""}
+
 def main():
     today = datetime.now(timezone.utc).date()
     yesterday = today - timedelta(days=1)
-    if not os.path.exists(TRACKED_FILE):
-        print('No tracked.json! Exiting.')
-        return
     tracked = load_json_or_default(TRACKED_FILE, {'repos': []})
     notified = load_json_or_default(NOTIFIED_FILE, {})
     releases_list = load_json_or_default(RELEASES_FILE, [])
 
-    # Maintain a set for (repo, tag) for deduplication
-    existing_release_keys = set(
-        (entry.get("repo"), entry.get("tag")) for entry in releases_list if "repo" in entry and "tag" in entry
-    )
-
+    # 1. Notification and asset logic
     for repo in tracked.get('repos', []):
         url = f'https://api.github.com/repos/{repo}/releases'
         r = requests.get(url)
@@ -88,7 +98,6 @@ def main():
         if rel_date is None or rel_date < yesterday:
             continue
         if str(latest['id']) != str(notified.get(repo, '')):
-            # Prepare the formatted message
             notes = (latest.get("body") or '').replace('<', "&lt;").replace('>', "&gt;")
             note1 = (notes[:300] + "…") if notes and len(notes) > 300 else notes
             text = (
@@ -102,7 +111,6 @@ def main():
             text += "\n⬇️ <b>Download below</b>:"
             send_telegram_message(text, btn_url=latest["html_url"])
 
-            # Send all non-"source code" assets as files with the custom caption
             repo_only = repo.split('/')[-1]
             tag = str(latest['tag_name'])
             for asset in latest.get("assets", []):
@@ -116,21 +124,16 @@ def main():
                 )
             notified[repo] = str(latest['id'])
 
-            # --- Add release entry to releases.json ---
-            release_key = (repo, tag)
-            # Only add if not already present
-            if release_key not in existing_release_keys:
-                releases_list.insert(0, {
-                    "repo": repo,
-                    "tag": tag,
-                    "date": rel_date.strftime("%Y-%m-%d")
-                })
-                existing_release_keys.add(release_key)
-
     save_json(NOTIFIED_FILE, notified)
-    save_json(RELEASES_FILE, releases_list)
 
-    # badge update
+    # 2. releases.json update: scan EVERY tracked repo and update latest (always up-to-date, NO mixing notification logic)
+    all_releases = []
+    for repo in tracked.get('repos', []):
+        latest_entry = fetch_latest_release(repo)
+        all_releases.append(latest_entry)
+    save_json(RELEASES_FILE, all_releases)
+
+    # 3. Badge update
     os.makedirs('badge', exist_ok=True)
     with open(BADGE_FILE, 'w') as f:
         json.dump({
