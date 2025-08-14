@@ -24,12 +24,13 @@ jobs:
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           TELEGRAM_CHANNEL: ${{ secrets.TELEGRAM_CHANNEL }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python poll_github.py
 
-      - name: Commit & Push notification state and badge
+      - name: Commit & Push notification state, badge, and releases.json
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
-          git add data/notified.json badge/tracked-count.json
-          git commit -m "Update notified releases and badge [auto]" || echo "Nothing to commit"
+          git add data/notified.json badge/tracked-count.json data/releases.json
+          git commit -m "Update notified releases, badge, and releases log [auto]" || echo "Nothing to commit"
           git push
