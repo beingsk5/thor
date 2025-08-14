@@ -18,16 +18,17 @@ GITHUB_TOKEN = os.environ['GITHUB_TOKEN']
 TELEGRAM_CHANNEL = os.environ.get("TELEGRAM_CHANNEL", "@yourchannel")
 ADMIN_ID = int(os.environ.get("ADMIN_ID", "123456"))
 DATA_PATH = "data/tracked.json"
+RELEASES_DATA_PATH = "data/releases.json"
 RELEASES_PAGE_SIZE = 15
 
 def github_headers():
     return {"Authorization": f"token {GITHUB_TOKEN}"}
 
-def github_file_url():
-    return f"https://api.github.com/repos/{GITHUB_OWNER}/{GITHUB_REPO}/contents/{DATA_PATH}"
+def github_file_url(path):
+    return f"https://api.github.com/repos/{GITHUB_OWNER}/{GITHUB_REPO}/contents/{path}"
 
 def load_tracked():
-    url = github_file_url()
+    url = github_file_url(DATA_PATH)
     r = requests.get(url, headers=github_headers())
     if r.status_code == 404:
         return [], None
@@ -39,7 +40,7 @@ def load_tracked():
     return data.get("repos", []), sha
 
 def save_tracked(repos, sha):
-    url = github_file_url()
+    url = github_file_url(DATA_PATH)
     from base64 import b64encode
     new_data = json.dumps({"repos": repos}, indent=2)
     payload = {
@@ -60,8 +61,27 @@ def extract_repos_from_text(text):
 
 def validate_repo_exists(repo):
     url = f"https://api.github.com/repos/{repo}"
-    r = requests.get(url)
-    return r.ok
+    headers = github_headers()
+    resp = requests.get(url, headers=headers)
+    if resp.ok:
+        data = resp.json()
+        if 'full_name' in data and data['full_name'] == repo:
+            return True
+    return False
+
+def load_releases_data():
+    url = github_file_url(RELEASES_DATA_PATH)
+    r = requests.get(url, headers=github_headers())
+    if r.status_code == 404:
+        return []
+    r.raise_for_status()
+    content = r.json()
+    from base64 import b64decode
+    try:
+        data = json.loads(b64decode(content["content"] + '===').decode())
+    except Exception:
+        data = []
+    return data if isinstance(data, list) else []
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
@@ -76,23 +96,23 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def help_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "/add <repo(s)> — Add one or more repos (url or username/repo)\n"
-        "/remove <repo> — Remove a tracked repo\n"
+        "/add <repo(s)> — Add repo(s)\n"
+        "/remove <repo> — Remove repo\n"
         "/list — Show tracked repos\n"
-        "/releases — Show recent releases (personal chat only, paged)\n"
-        "/notify <repo> — Notify channel about latest release\n"
-        "/chart — Release chart (text only)\n"
+        "/releases — Paginated release log (private chat only)\n"
+        "/notify <repo> — Manually notify channel\n"
+        "/chart — Release chart (text)\n"
         "/about — About\n"
         "/clearall — Clear all (admin)\n"
-        "/ping — Check bot is alive"
+        "/ping — Check bot"
     )
 
 async def about(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "🦸 GitHub Release Tracker\n"
-        "• Paste repos or use commands\n"
+        "• Add repos or use commands\n"
         "• Persistent storage in your GitHub\n"
-        "• Channel notifications via GitHub Actions"
+        "• Channel notifications"
     )
 
 async def ping(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -106,11 +126,11 @@ async def add_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def remove_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not context.args:
-        await update.message.reply_text("Usage: /remove <repo or link>")
+        await update.message.reply_text("Usage: /remove <repo>")
         return
     repos_to_remove = extract_repos_from_text(" ".join(context.args))
     if not repos_to_remove:
-        await update.message.reply_text("No valid repositories recognized for removal. Please check the format (username/repo or link).")
+        await update.message.reply_text("No valid repositories recognized for removal.")
         return
     repos, sha = load_tracked()
     actually_removed, not_found = [], []
@@ -138,12 +158,12 @@ async def process_repo_addition(update, text):
     repos_to_check = extract_repos_from_text(text)
     if not repos_to_check:
         await update.message.reply_text(
-            "❗ No valid repositories found. Please use the format username/repo or paste a full GitHub repo link."
+            "❗ No valid repositories found. Use username/repo or GitHub repo link."
         )
         return
     if len(repos_to_check) > 20:
         await update.message.reply_text(
-            "⚠️ Too many repos in one message (max 20 at a time). Please send in smaller batches."
+            "⚠️ Max 20 repos at a time. Please split the list."
         )
         return
     added, skipped, failed = [], [], []
@@ -174,62 +194,43 @@ async def process_repo_addition(update, text):
 async def list_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     repos, _ = load_tracked()
     if not repos:
-        await update.message.reply_text("No repositories currently tracked.")
+        await update.message.reply_text("No repositories tracked.")
         return
     await update.message.reply_text(
         "📋 Tracked repos:\n" + "\n".join(f"- `{r}`" for r in repos), parse_mode="Markdown"
     )
 
-# --- RELEASES: For personal chat only, paged, newest to oldest, fetches every repo ---
+# --- /releases: List from data/releases.json ---
 async def releases_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_chat.type != "private":
         await update.message.reply_text("⚠️ /releases works only in your personal chat with the bot.")
         return
-    repos, _ = load_tracked()
-    if not repos:
-        await update.message.reply_text("No tracked repositories. Add some first.")
+    releases_data = load_releases_data()
+    if not releases_data:
+        await update.message.reply_text("No releases are recorded yet. Wait for an update.")
         return
-    releases_info = []
-    for repo in repos:
-        url = f"https://api.github.com/repos/{repo}/releases"
-        try:
-            resp = requests.get(url)
-            if not resp.ok:
-                releases_info.append((datetime.min.replace(tzinfo=timezone.utc), repo, None))
-                continue
-            releases = resp.json()
-            found_release = None
-            for rel in releases:
-                if rel.get("published_at") and rel.get("tag_name"):
-                    found_release = rel
-                    break
-            if found_release:
-                rel_date = datetime.fromisoformat(found_release["published_at"].replace("Z", "+00:00"))
-                releases_info.append((rel_date, repo, found_release))
-            else:
-                releases_info.append((datetime.min.replace(tzinfo=timezone.utc), repo, None))
-        except Exception:
-            releases_info.append((datetime.min.replace(tzinfo=timezone.utc), repo, None))
-    releases_info.sort(reverse=True, key=lambda x: x[0])
+    releases_data.sort(key=lambda x: x.get("date") or "", reverse=True)
     chat_id = update.effective_chat.id
-    context.bot_data[f'releases_info_{chat_id}'] = releases_info
+    context.bot_data[f'releases_list_{chat_id}'] = releases_data
     await show_releases_page(update, context, page=0)
 
 async def show_releases_page(update, context, page=0):
     chat_id = update.effective_chat.id
-    releases_info = context.bot_data.get(f'releases_info_{chat_id}', [])
+    releases_data = context.bot_data.get(f'releases_list_{chat_id}', [])
     page_size = RELEASES_PAGE_SIZE
-    total = len(releases_info)
+    total = len(releases_data)
     start = page * page_size
     end = min(start + page_size, total)
-    subset = releases_info[start:end]
-    msg = f"📦 <b>Latest releases ({start+1}-{end}/{total})</b>\n\n"
-    for rel_date, repo, rel in subset:
-        if not rel or rel_date == datetime.min.replace(tzinfo=timezone.utc):
-            msg += f"🔸 {repo}: <i>No actual releases found.</i>\n"
-        else:
-            date_str = rel_date.strftime('%Y-%m-%d')
-            msg += f"🔹 <b>{repo}</b>: <code>{rel['tag_name']}</code> ({date_str})\n"
+    subset = releases_data[start:end]
+    msg = f"📦 Release History ({start+1}-{end}/{total})\n\n"
+    if not subset:
+        msg += "No releases recorded."
+    else:
+        for rel in subset:
+            repo = rel.get("repo", "unknown/repo")
+            tag = rel.get("tag", "?")
+            date = rel.get("date", "?")
+            msg += f"{repo} — {tag} ({date})\n"
     nav_buttons = []
     if start > 0:
         nav_buttons.append(InlineKeyboardButton("⬅️ Back", callback_data=f"rel_page:{page-1}"))
@@ -248,7 +249,6 @@ async def releases_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     page = int(page_match.group(1)) if page_match else 0
     await show_releases_page(update, context, page)
 
-# --- /notify posts notification and files to TELEGRAM_CHANNEL, like poll_github.py ---
 async def notify_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not context.args:
         await update.message.reply_text("Usage: /notify <repo>")
@@ -256,7 +256,7 @@ async def notify_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     repo = context.args[0]
     repos, _ = load_tracked()
     if repo not in repos:
-        await update.message.reply_text(f"{repo} is not currently tracked.")
+        await update.message.reply_text(f"{repo} is not tracked.")
         return
     r = requests.get(f"https://api.github.com/repos/{repo}/releases")
     if not r.ok:
