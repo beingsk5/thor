@@ -211,48 +211,48 @@
   },
   {
     "repo": "ReSo7200/InstaEclipse",
-    "tag": "none",
-    "date": ""
+    "tag": "v0.4.2",
+    "date": "2025-06-28"
   },
   {
     "repo": "Magisk-Modules-Alt-Repo/audio-jitter-silencer",
-    "tag": "none",
-    "date": ""
+    "tag": "v1.0.10",
+    "date": "2025-06-07"
   },
   {
     "repo": "Magisk-Modules-Alt-Repo/audio-misc-settings",
-    "tag": "none",
-    "date": ""
+    "tag": "v1.3.11",
+    "date": "2025-06-07"
   },
   {
     "repo": "Magisk-Modules-Alt-Repo/audio-samplerate-changer",
-    "tag": "none",
-    "date": ""
+    "tag": "v1.1.7",
+    "date": "2025-06-23"
   },
   {
     "repo": "auag0/DisableAudioFocus",
-    "tag": "none",
-    "date": ""
+    "tag": "v1.1.0",
+    "date": "2025-03-24"
   },
   {
     "repo": "james34602/JamesDSPManager",
-    "tag": "none",
-    "date": ""
+    "tag": "28Nov2023",
+    "date": "2023-12-02"
   },
   {
     "repo": "Briclyaz/NLSound_module_QCom",
-    "tag": "none",
-    "date": ""
+    "tag": "v4.4",
+    "date": "2025-05-05"
   },
   {
     "repo": "WSTxda/ViperFX-RE-Releases",
-    "tag": "none",
-    "date": ""
+    "tag": "7.2",
+    "date": "2025-04-21"
   },
   {
     "repo": "Xposed-Modules-Repo/io.github.wzhy.xaudiocapture",
-    "tag": "none",
-    "date": ""
+    "tag": "1001-1.0.1",
+    "date": "2025-05-11"
   },
   {
     "repo": "XayahSuSuSu/Android-DataBackup",
