@@ -10,7 +10,23 @@ from telegram import (
 from telegram.ext import (
     ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes, CallbackQueryHandler
 )
+from flask import Flask
+from threading import Thread
+from base64 import b64encode, b64decode
 
+# --- Flask keepalive for 24/7 uptime (Replit) ---
+app_flask = Flask('')
+
+@app_flask.route('/')
+def home():
+    return "I'm alive!"
+
+def run_flask():
+    app_flask.run(host='0.0.0.0', port=8080)
+
+Thread(target=run_flask).start()
+
+# --- Telegram bot main setup ---
 BOT_TOKEN = os.environ['BOT_TOKEN']
 GITHUB_OWNER = os.environ['GITHUB_OWNER']
 GITHUB_REPO = os.environ['GITHUB_REPO']
@@ -19,6 +35,7 @@ TELEGRAM_CHANNEL = os.environ.get("TELEGRAM_CHANNEL", "@yourchannel")
 ADMIN_ID = int(os.environ.get("ADMIN_ID", "123456"))
 DATA_PATH = "data/tracked.json"
 RELEASES_DATA_PATH = "data/releases.json"
+NOTIFIED_PATH = "data/notified.json"
 RELEASES_PAGE_SIZE = 15
 
 def github_headers():
@@ -34,14 +51,17 @@ def load_tracked():
         return [], None
     r.raise_for_status()
     content = r.json()
-    from base64 import b64decode
-    data = json.loads(b64decode(content["content"] + '===').decode())
+    repos = []
     sha = content["sha"]
-    return data.get("repos", []), sha
+    try:
+        data = json.loads(b64decode(content["content"] + '===').decode())
+        repos = data.get("repos", [])
+    except Exception:
+        repos = []
+    return repos, sha
 
 def save_tracked(repos, sha):
     url = github_file_url(DATA_PATH)
-    from base64 import b64encode
     new_data = json.dumps({"repos": repos}, indent=2)
     payload = {
         "message": "Bot update tracked repos",
@@ -76,12 +96,39 @@ def load_releases_data():
         return []
     r.raise_for_status()
     content = r.json()
-    from base64 import b64decode
     try:
         data = json.loads(b64decode(content["content"] + '===').decode())
     except Exception:
         data = []
     return data if isinstance(data, list) else []
+
+def load_notified():
+    url = github_file_url(NOTIFIED_PATH)
+    r = requests.get(url, headers=github_headers())
+    if r.status_code == 404:
+        return {}, None
+    r.raise_for_status()
+    content = r.json()
+    try:
+        data = json.loads(b64decode(content["content"] + '===').decode())
+    except Exception:
+        data = {}
+    sha = content["sha"]
+    return data, sha
+
+def save_notified(notified, sha):
+    url = github_file_url(NOTIFIED_PATH)
+    new_data = json.dumps(notified, indent=2)
+    payload = {
+        "message": "Bot update notified.json (manual notify)",
+        "content": b64encode(new_data.encode()).decode(),
+        "sha": sha
+    }
+    r = requests.put(url, headers=github_headers(), json=payload)
+    r.raise_for_status()
+    return r.json()['content']['sha']
+
+# --- Bot Handlers ---
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
@@ -100,7 +147,7 @@ async def help_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "/remove <repo> — Remove repo\n"
         "/list — Show tracked repos\n"
         "/releases — Paginated release log (private chat only)\n"
-        "/notify <repo> — Manually notify channel\n"
+        "/notify <repo> — Manually notify channel AND update notified.json\n"
         "/chart — Release chart (text)\n"
         "/about — About\n"
         "/clearall — Clear all (admin)\n"
@@ -300,6 +347,11 @@ async def notify_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
             file_bytes.name = asset.get("name", "asset.bin")
             await context.bot.send_document(chat_id=TELEGRAM_CHANNEL, document=InputFile(file_bytes),
                                            caption=caption, parse_mode="HTML")
+    # --- Update notified.json in GitHub! ---
+    notified, sha = load_notified()
+    if latest and tag and "id" in latest:
+        notified[repo] = str(latest["id"])
+        save_notified(notified, sha)
 
 async def chart_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     repos, _ = load_tracked()
