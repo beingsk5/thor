@@ -226,217 +226,217 @@
   },
   {
     "repo": "Magisk-Modules-Alt-Repo/audio-samplerate-changer",
-    "tag": "none",
-    "date": ""
+    "tag": "v1.1.7",
+    "date": "2025-06-23"
   },
   {
     "repo": "auag0/DisableAudioFocus",
-    "tag": "none",
-    "date": ""
+    "tag": "v1.1.0",
+    "date": "2025-03-24"
   },
   {
     "repo": "james34602/JamesDSPManager",
-    "tag": "none",
-    "date": ""
+    "tag": "28Nov2023",
+    "date": "2023-12-02"
   },
   {
     "repo": "Briclyaz/NLSound_module_QCom",
-    "tag": "none",
-    "date": ""
+    "tag": "v4.4",
+    "date": "2025-05-05"
   },
   {
     "repo": "WSTxda/ViperFX-RE-Releases",
-    "tag": "none",
-    "date": ""
+    "tag": "7.2",
+    "date": "2025-04-21"
   },
   {
     "repo": "Xposed-Modules-Repo/io.github.wzhy.xaudiocapture",
-    "tag": "none",
-    "date": ""
+    "tag": "1001-1.0.1",
+    "date": "2025-05-11"
   },
   {
     "repo": "XayahSuSuSu/Android-DataBackup",
-    "tag": "none",
-    "date": ""
+    "tag": "2.0.10",
+    "date": "2025-08-10"
   },
   {
     "repo": "UNKNUW/Background-App-Slayer",
-    "tag": "none",
-    "date": ""
+    "tag": "5.1.2",
+    "date": "2025-06-05"
   },
   {
     "repo": "Skyghost090/Extreme-Gms-Doze",
-    "tag": "none",
-    "date": ""
+    "tag": "4",
+    "date": "2025-07-14"
   },
   {
     "repo": "NoWakeLock/NoWakeLock",
-    "tag": "none",
-    "date": ""
+    "tag": "v3.0.7",
+    "date": "2025-07-26"
   },
   {
     "repo": "araafroyall/Cleaner-Royall",
-    "tag": "none",
-    "date": ""
+    "tag": "Cleaner-Royall-v4.6",
+    "date": "2025-07-29"
   },
   {
     "repo": "Magisk-Modules-Alt-Repo/video-to-bootanimation",
-    "tag": "none",
-    "date": ""
+    "tag": "V4",
+    "date": "2025-01-08"
   },
   {
     "repo": "Keinta15/Magisk-iOS-Emoji",
-    "tag": "none",
-    "date": ""
+    "tag": "v18.4",
+    "date": "2025-04-26"
   },
   {
     "repo": "Mahmud0808/PixelLauncherEnhanced",
-    "tag": "none",
-    "date": ""
+    "tag": "v1.0.3",
+    "date": "2025-05-04"
   },
   {
     "repo": "KieronQuinn/PixelLauncherMods",
-    "tag": "none",
-    "date": ""
+    "tag": "2.6.7",
+    "date": "2025-05-20"
   },
   {
     "repo": "zacharee/Tweaker",
-    "tag": "none",
-    "date": ""
+    "tag": "362",
+    "date": "2024-02-17"
   },
   {
     "repo": "Mahmud0808/ColorBlendr",
-    "tag": "none",
-    "date": ""
+    "tag": "v1.11.5",
+    "date": "2025-03-15"
   },
   {
     "repo": "RichardLuo0/global-icon-pack-android",
-    "tag": "none",
-    "date": ""
+    "tag": "0.4.10",
+    "date": "2025-08-15"
   },
   {
     "repo": "xfqwdsj/IAmNotADeveloper",
-    "tag": "none",
-    "date": ""
+    "tag": "1.6.2",
+    "date": "2025-08-01"
   },
   {
     "repo": "Magisk-Modules-Alt-Repo/chroot-distro",
-    "tag": "none",
-    "date": ""
+    "tag": "v2.1.0",
+    "date": "2025-06-11"
   },
   {
     "repo": "RikkaApps/Shizuku",
-    "tag": "none",
-    "date": ""
+    "tag": "v13.6.0",
+    "date": "2025-05-25"
   },
   {
     "repo": "mgksu/dockerd",
-    "tag": "none",
-    "date": ""
+    "tag": "v28.2.1",
+    "date": "2025-05-29"
   },
   {
     "repo": "FurLC/ZRAM-Module",
-    "tag": "none",
-    "date": ""
+    "tag": "v1.3.0",
+    "date": "2025-05-31"
   },
   {
     "repo": "AnsahMohammad/shots-studio",
-    "tag": "none",
-    "date": ""
+    "tag": "v1.8.146",
+    "date": "2025-08-10"
   },
   {
     "repo": "Drsexo/Greenify4Magisk-KSU-Reborn",
-    "tag": "none",
-    "date": ""
+    "tag": "v5.1.1.1",
+    "date": "2025-07-30"
   },
   {
     "repo": "FossifyOrg/File-Manager",
-    "tag": "none",
-    "date": ""
+    "tag": "1.2.0",
+    "date": "2025-07-12"
   },
   {
     "repo": "zhanghai/MaterialFiles",
-    "tag": "none",
-    "date": ""
+    "tag": "v1.7.4",
+    "date": "2024-06-30"
   },
   {
     "repo": "fatalcoder524/KernelFlasher",
-    "tag": "none",
-    "date": ""
+    "tag": "v1.6.0",
+    "date": "2025-07-20"
   },
   {
     "repo": "reveny/Android-Native-Root-Detector",
-    "tag": "none",
-    "date": ""
+    "tag": "v7.3.1",
+    "date": "2025-08-06"
   },
   {
     "repo": "Magisk-Modules-Alt-Repo/abootloop",
-    "tag": "none",
-    "date": ""
+    "tag": "v1.3.4",
+    "date": "2025-03-10"
   },
   {
     "repo": "Magisk-Modules-Alt-Repo/YetAnotherBootloopProtector",
-    "tag": "none",
-    "date": ""
+    "tag": "4.4",
+    "date": "2025-03-04"
   },
   {
     "repo": "Domi04151309/AlwaysOn",
-    "tag": "none",
-    "date": ""
+    "tag": "3.10.0",
+    "date": "2025-05-10"
   },
   {
     "repo": "99keshav99/CaptureSposed",
-    "tag": "none",
-    "date": ""
+    "tag": "1.0.7",
+    "date": "2025-02-20"
   },
   {
     "repo": "ahmedmani/pairipfix",
-    "tag": "none",
-    "date": ""
+    "tag": "v1.0.1",
+    "date": "2025-06-12"
   },
   {
     "repo": "LSPosed/CorePatch",
-    "tag": "none",
-    "date": ""
+    "tag": "4.7",
+    "date": "2025-06-14"
   },
   {
     "repo": "PranavPurwar/AppLock",
-    "tag": "none",
-    "date": ""
+    "tag": "v1.5.1",
+    "date": "2025-08-05"
   },
   {
     "repo": "beakthoven/TrickyStore",
-    "tag": "none",
-    "date": ""
+    "tag": "v2.1.0",
+    "date": "2025-08-11"
   },
   {
     "repo": "ineffablexd/Ineffable-Hub",
-    "tag": "none",
-    "date": ""
+    "tag": "v1.0.1",
+    "date": "2025-07-15"
   },
   {
     "repo": "Doze-off/Hide-folders-files",
-    "tag": "none",
-    "date": ""
+    "tag": "V5",
+    "date": "2025-07-19"
   },
   {
     "repo": "Mino260806/KeyboardGPT",
-    "tag": "none",
-    "date": ""
+    "tag": "v2.0",
+    "date": "2025-08-12"
   },
   {
     "repo": "Magisk-Modules-Repo/callrecorder-skvalex",
-    "tag": "none",
-    "date": ""
+    "tag": "v.56",
+    "date": "2025-06-04"
   },
   {
     "repo": "Goooler/LawnchairRelease",
-    "tag": "none",
-    "date": ""
+    "tag": "15.0.0-20250807",
+    "date": "2025-08-07"
   },
   {
     "repo": "ThePedroo/ReLSPosed",
-    "tag": "none",
-    "date": ""
+    "tag": "v1.0.1",
+    "date": "2025-08-08"
   }
 ]
