@@ -226,28 +226,28 @@
   },
   {
     "repo": "Magisk-Modules-Alt-Repo/audio-samplerate-changer",
-    "tag": "v1.1.7",
-    "date": "2025-06-23"
+    "tag": "none",
+    "date": ""
   },
   {
     "repo": "auag0/DisableAudioFocus",
-    "tag": "v1.1.0",
-    "date": "2025-03-24"
+    "tag": "none",
+    "date": ""
   },
   {
     "repo": "james34602/JamesDSPManager",
-    "tag": "28Nov2023",
-    "date": "2023-12-02"
+    "tag": "none",
+    "date": ""
   },
   {
     "repo": "Briclyaz/NLSound_module_QCom",
-    "tag": "v4.4",
-    "date": "2025-05-05"
+    "tag": "none",
+    "date": ""
   },
   {
     "repo": "WSTxda/ViperFX-RE-Releases",
-    "tag": "7.2",
-    "date": "2025-04-21"
+    "tag": "none",
+    "date": ""
   },
   {
     "repo": "Xposed-Modules-Repo/io.github.wzhy.xaudiocapture",
