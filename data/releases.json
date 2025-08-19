@@ -175,11 +175,6 @@
     "date": "2025-08-11"
   },
   {
-    "repo": "hujiayucc/Fuck-AD",
-    "tag": "2.0.5",
-    "date": "2025-08-14"
-  },
-  {
     "repo": "Magisk-Modules-Alt-Repo/systemless-adblocker",
     "tag": "1.11",
     "date": "2025-02-22"
@@ -296,8 +291,8 @@
   },
   {
     "repo": "KieronQuinn/PixelLauncherMods",
-    "tag": "2.6.7",
-    "date": "2025-05-20"
+    "tag": "none",
+    "date": ""
   },
   {
     "repo": "zacharee/Tweaker",
