@@ -176,113 +176,113 @@
   },
   {
     "repo": "Magisk-Modules-Alt-Repo/systemless-adblocker",
-    "tag": "none",
-    "date": ""
+    "tag": "1.11",
+    "date": "2025-02-22"
   },
   {
     "repo": "symbuzzer/systemless-hosts-KernelSU-module",
-    "tag": "none",
-    "date": ""
+    "tag": "v1.2.0",
+    "date": "2025-02-15"
   },
   {
     "repo": "NeoApplications/Neo-Store",
-    "tag": "none",
-    "date": ""
+    "tag": "1.1.1",
+    "date": "2025-08-22"
   },
   {
     "repo": "Droid-ify/client",
-    "tag": "none",
-    "date": ""
+    "tag": "v0.6.6",
+    "date": "2025-07-06"
   },
   {
     "repo": "Tornaco/Thanox",
-    "tag": "none",
-    "date": ""
+    "tag": "v8.2",
+    "date": "2025-08-11"
   },
   {
     "repo": "revenge-mod/revenge-xposed",
-    "tag": "none",
-    "date": ""
+    "tag": "1300",
+    "date": "2025-08-09"
   },
   {
     "repo": "ReSo7200/InstaEclipse",
-    "tag": "none",
-    "date": ""
+    "tag": "v0.4.3",
+    "date": "2025-08-15"
   },
   {
     "repo": "Magisk-Modules-Alt-Repo/audio-jitter-silencer",
-    "tag": "none",
-    "date": ""
+    "tag": "v1.0.10",
+    "date": "2025-06-07"
   },
   {
     "repo": "Magisk-Modules-Alt-Repo/audio-misc-settings",
-    "tag": "none",
-    "date": ""
+    "tag": "v1.3.11",
+    "date": "2025-06-07"
   },
   {
     "repo": "Magisk-Modules-Alt-Repo/audio-samplerate-changer",
-    "tag": "none",
-    "date": ""
+    "tag": "v1.1.7",
+    "date": "2025-06-23"
   },
   {
     "repo": "auag0/DisableAudioFocus",
-    "tag": "none",
-    "date": ""
+    "tag": "v1.1.0",
+    "date": "2025-03-24"
   },
   {
     "repo": "james34602/JamesDSPManager",
-    "tag": "none",
-    "date": ""
+    "tag": "28Nov2023",
+    "date": "2023-12-02"
   },
   {
     "repo": "Briclyaz/NLSound_module_QCom",
-    "tag": "none",
-    "date": ""
+    "tag": "v4.4",
+    "date": "2025-05-05"
   },
   {
     "repo": "WSTxda/ViperFX-RE-Releases",
-    "tag": "none",
-    "date": ""
+    "tag": "7.2",
+    "date": "2025-04-21"
   },
   {
     "repo": "Xposed-Modules-Repo/io.github.wzhy.xaudiocapture",
-    "tag": "none",
-    "date": ""
+    "tag": "1001-1.0.1",
+    "date": "2025-05-11"
   },
   {
     "repo": "XayahSuSuSu/Android-DataBackup",
-    "tag": "none",
-    "date": ""
+    "tag": "2.0.11",
+    "date": "2025-08-21"
   },
   {
     "repo": "UNKNUW/Background-App-Slayer",
-    "tag": "none",
-    "date": ""
+    "tag": "5.1.2",
+    "date": "2025-06-05"
   },
   {
     "repo": "Skyghost090/Extreme-Gms-Doze",
-    "tag": "none",
-    "date": ""
+    "tag": "4",
+    "date": "2025-07-14"
   },
   {
     "repo": "NoWakeLock/NoWakeLock",
-    "tag": "none",
-    "date": ""
+    "tag": "v3.0.7",
+    "date": "2025-07-26"
   },
   {
     "repo": "araafroyall/Cleaner-Royall",
-    "tag": "none",
-    "date": ""
+    "tag": "Cleaner-Royall-v4.6",
+    "date": "2025-07-29"
   },
   {
     "repo": "Magisk-Modules-Alt-Repo/video-to-bootanimation",
-    "tag": "none",
-    "date": ""
+    "tag": "V4",
+    "date": "2025-01-08"
   },
   {
     "repo": "Keinta15/Magisk-iOS-Emoji",
-    "tag": "none",
-    "date": ""
+    "tag": "v18.4",
+    "date": "2025-04-26"
   },
   {
     "repo": "Mahmud0808/PixelLauncherEnhanced",
