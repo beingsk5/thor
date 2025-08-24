@@ -10,7 +10,7 @@
 - 📢 **Sends Release Updates to Telegram**
 - 📊 **Auto-generated Chart and Repo Count Badge**
 - 🧠 **Intelligent Parsing (auto-detects `user/repo` or full URLs)**
-- 🔧 **Easy Commands: `/add`, `/clearall`, `/help`, `/about`, `/chart`, `/releases`**
+- 🔧 **Easy Commands: `/add`, `/clearall`, `/help`, `/about`, `/releases`**
 - ♻️ **Survives Bot Restarts and Updates**
 
 ---
@@ -27,7 +27,6 @@
 /ping – Check if bot is alive  
 /help – Get usage info  
 /about – Info about this bot  
-/chart – Show repo tracking chart  
 /releases – Show latest releases
 
 ---
