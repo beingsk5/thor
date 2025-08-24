@@ -46,107 +46,207 @@
   },
   {
     "repo": "osm0sis/PlayIntegrityFork",
-    "tag": "v14",
-    "date": "2025-07-29"
+    "tag": "none",
+    "date": ""
   },
   {
     "repo": "Dr-TSNG/ZygiskNext",
-    "tag": "v1.2.9.1",
-    "date": "2025-07-16"
+    "tag": "none",
+    "date": ""
   },
   {
     "repo": "reveny/Android-VBMeta-Fixer",
-    "tag": "v1.2.0",
-    "date": "2025-05-10"
+    "tag": "none",
+    "date": ""
   },
   {
     "repo": "JingMatrix/NeoZygisk",
-    "tag": "v1.2",
-    "date": "2025-07-31"
+    "tag": "none",
+    "date": ""
   },
   {
     "repo": "MhmRdd/NoHello",
-    "tag": "0.0.7",
-    "date": "2025-05-31"
+    "tag": "none",
+    "date": ""
   },
   {
     "repo": "dpejoh/yurikey",
-    "tag": "v1.8",
-    "date": "2025-08-20"
+    "tag": "none",
+    "date": ""
   },
   {
     "repo": "j-hc/zygisk-detach",
-    "tag": "v1.20.1",
-    "date": "2025-06-01"
+    "tag": "none",
+    "date": ""
   },
   {
     "repo": "EricInacio01/PlayIntegrityFix-NEXT",
-    "tag": "v3.0-release",
-    "date": "2025-08-09"
+    "tag": "none",
+    "date": ""
   },
   {
     "repo": "chenxiaolong/BCR",
-    "tag": "v1.79",
-    "date": "2025-07-26"
+    "tag": "none",
+    "date": ""
   },
   {
     "repo": "LSPosed/LSPosed.github.io",
-    "tag": "shamiko-414",
-    "date": "2025-06-18"
+    "tag": "none",
+    "date": ""
   },
   {
     "repo": "PerformanC/ReZygisk",
-    "tag": "v1.0.0-rc.3",
-    "date": "2025-07-14"
+    "tag": "none",
+    "date": ""
   },
   {
     "repo": "re-zero001/LSPosed-Irena",
-    "tag": "1.9.2",
-    "date": "2024-10-17"
+    "tag": "none",
+    "date": ""
   },
   {
     "repo": "j-hc/FlagSecurePatcher",
-    "tag": "r15",
-    "date": "2025-04-03"
+    "tag": "none",
+    "date": ""
   },
   {
     "repo": "sidex15/susfs4ksu-module",
-    "tag": "v1.5.2+_R20",
-    "date": "2025-07-06"
+    "tag": "none",
+    "date": ""
   },
   {
     "repo": "vvb2060/KeyAttestation",
-    "tag": "v1.8.4",
-    "date": "2025-01-16"
+    "tag": "none",
+    "date": ""
   },
   {
     "repo": "Dr-TSNG/Hide-My-Applist",
-    "tag": "V3.5",
-    "date": "2025-06-28"
+    "tag": "none",
+    "date": ""
   },
   {
     "repo": "pumPCin/HMAL",
-    "tag": "V4.1.1.r62",
-    "date": "2024-12-23"
+    "tag": "none",
+    "date": ""
   },
   {
     "repo": "chsbuffer/ReVancedXposed",
-    "tag": "1.0.24",
-    "date": "2025-08-22"
+    "tag": "none",
+    "date": ""
   },
   {
     "repo": "siavash79/PixelXpert",
-    "tag": "v5.0.0",
-    "date": "2025-08-22"
+    "tag": "none",
+    "date": ""
   },
   {
     "repo": "snake-4/Zygisk-Assistant",
-    "tag": "v2.1.4",
-    "date": "2025-02-23"
+    "tag": "none",
+    "date": ""
   },
   {
     "repo": "ZG089/Re-Malwack",
-    "tag": "v6.0",
-    "date": "2025-03-31"
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "pantsufan/BlockAds",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "Droid-ify/client",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "Magisk-Modules-Alt-Repo/audio-misc-settings",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "ReSo7200/InstaEclipse",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "Vaz15k/Cubic-AdBlock",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "NeoApplications/Neo-Store",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "Magisk-Modules-Alt-Repo/systemless-adblocker",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "mikropsoft/StevenBlock",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "james34602/JamesDSPManager",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "bindhosts/bindhosts",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "KOWX712/PlayIntegrityFix",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "Xposed-Modules-Repo/io.github.wzhy.xaudiocapture",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "WSTxda/ViperFX-RE-Releases",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "auag0/DisableAudioFocus",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "symbuzzer/systemless-hosts-KernelSU-module",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "revenge-mod/revenge-xposed",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "Magisk-Modules-Alt-Repo/audio-samplerate-changer",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "Tornaco/Thanox",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "Magisk-Modules-Alt-Repo/audio-jitter-silencer",
+    "tag": "none",
+    "date": ""
+  },
+  {
+    "repo": "Briclyaz/NLSound_module_QCom",
+    "tag": "none",
+    "date": ""
   }
 ]
