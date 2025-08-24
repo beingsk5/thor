@@ -36,6 +36,26 @@
     "FurLC/ZRAM-Module",
     "mgksu/dockerd",
     "zacharee/Tweaker",
-    "Skyghost090/Extreme-Gms-Doze"
+    "Skyghost090/Extreme-Gms-Doze",
+    "Magisk-Modules-Alt-Repo/audio-jitter-silencer",
+    "james34602/JamesDSPManager",
+    "Magisk-Modules-Alt-Repo/systemless-adblocker",
+    "revenge-mod/revenge-xposed",
+    "Xposed-Modules-Repo/io.github.wzhy.xaudiocapture",
+    "pantsufan/BlockAds",
+    "Magisk-Modules-Alt-Repo/audio-samplerate-changer",
+    "bindhosts/bindhosts",
+    "Tornaco/Thanox",
+    "Droid-ify/client",
+    "symbuzzer/systemless-hosts-KernelSU-module",
+    "auag0/DisableAudioFocus",
+    "Magisk-Modules-Alt-Repo/audio-misc-settings",
+    "Briclyaz/NLSound_module_QCom",
+    "Vaz15k/Cubic-AdBlock",
+    "NeoApplications/Neo-Store",
+    "ReSo7200/InstaEclipse",
+    "KOWX712/PlayIntegrityFix",
+    "WSTxda/ViperFX-RE-Releases",
+    "mikropsoft/StevenBlock"
   ]
 }
