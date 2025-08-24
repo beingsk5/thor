@@ -12,6 +12,23 @@
     "osm0sis/PlayIntegrityFork",
     "Dr-TSNG/ZygiskNext",
     "reveny/Android-VBMeta-Fixer",
-    "JingMatrix/NeoZygisk"
+    "JingMatrix/NeoZygisk",
+    "MhmRdd/NoHello",
+    "dpejoh/yurikey",
+    "j-hc/zygisk-detach",
+    "EricInacio01/PlayIntegrityFix-NEXT",
+    "chenxiaolong/BCR",
+    "LSPosed/LSPosed.github.io",
+    "PerformanC/ReZygisk",
+    "re-zero001/LSPosed-Irena",
+    "j-hc/FlagSecurePatcher",
+    "sidex15/susfs4ksu-module",
+    "vvb2060/KeyAttestation",
+    "Dr-TSNG/Hide-My-Applist",
+    "pumPCin/HMAL",
+    "chsbuffer/ReVancedXposed",
+    "siavash79/PixelXpert",
+    "snake-4/Zygisk-Assistant",
+    "ZG089/Re-Malwack"
   ]
 }
