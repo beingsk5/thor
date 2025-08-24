@@ -83,5 +83,105 @@
     "repo": "Magisk-Modules-Alt-Repo/abootloop",
     "tag": "v1.3.4",
     "date": "2025-03-10"
+  },
+  {
+    "repo": "KieronQuinn/PixelLauncherMods",
+    "tag": "2.6.7",
+    "date": "2025-05-20"
+  },
+  {
+    "repo": "NoWakeLock/NoWakeLock",
+    "tag": "v3.0.7",
+    "date": "2025-07-26"
+  },
+  {
+    "repo": "FossifyOrg/File-Manager",
+    "tag": "1.2.0",
+    "date": "2025-07-12"
+  },
+  {
+    "repo": "zacharee/Tweaker",
+    "tag": "362",
+    "date": "2024-02-17"
+  },
+  {
+    "repo": "FurLC/ZRAM-Module",
+    "tag": "v1.3.0",
+    "date": "2025-05-31"
+  },
+  {
+    "repo": "Skyghost090/Extreme-Gms-Doze",
+    "tag": "4",
+    "date": "2025-07-14"
+  },
+  {
+    "repo": "UNKNUW/Background-App-Slayer",
+    "tag": "5.1.2",
+    "date": "2025-06-05"
+  },
+  {
+    "repo": "XayahSuSuSu/Android-DataBackup",
+    "tag": "2.0.11",
+    "date": "2025-08-21"
+  },
+  {
+    "repo": "araafroyall/Cleaner-Royall",
+    "tag": "Cleaner-Royall-v4.6",
+    "date": "2025-07-29"
+  },
+  {
+    "repo": "AnsahMohammad/shots-studio",
+    "tag": "v1.8.146",
+    "date": "2025-08-10"
+  },
+  {
+    "repo": "Mahmud0808/ColorBlendr",
+    "tag": "v1.11.5",
+    "date": "2025-03-15"
+  },
+  {
+    "repo": "xfqwdsj/IAmNotADeveloper",
+    "tag": "1.6.2",
+    "date": "2025-08-01"
+  },
+  {
+    "repo": "Mahmud0808/PixelLauncherEnhanced",
+    "tag": "v1.0.3",
+    "date": "2025-05-04"
+  },
+  {
+    "repo": "Keinta15/Magisk-iOS-Emoji",
+    "tag": "v18.4",
+    "date": "2025-04-26"
+  },
+  {
+    "repo": "mgksu/dockerd",
+    "tag": "v28.2.1",
+    "date": "2025-05-29"
+  },
+  {
+    "repo": "RichardLuo0/global-icon-pack-android",
+    "tag": "0.4.10",
+    "date": "2025-08-15"
+  },
+  {
+    "repo": "RikkaApps/Shizuku",
+    "tag": "v13.6.0",
+    "date": "2025-05-25"
+  },
+  {
+    "repo": "Magisk-Modules-Alt-Repo/chroot-distro",
+    "tag": "v2.1.0",
+    "date": "2025-06-11"
+  },
+  {
+    "repo": "Drsexo/Greenify4Magisk-KSU-Reborn",
+    "tag": "v5.1.1.1",
+    "date": "2025-07-30"
+  },
+  {
+    "repo": "Magisk-Modules-Alt-Repo/video-to-bootanimation",
+    "tag": "V4",
+    "date": "2025-01-08"
   }
 ]
