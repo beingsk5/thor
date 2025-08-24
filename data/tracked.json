@@ -2,6 +2,16 @@
   "repos": [
     "JingMatrix/LSPosed",
     "AloozChips/OneUIEmojiPack",
-    "Mahmud0808/Iconify"
+    "Mahmud0808/Iconify",
+    "KOWX712/Tricky-Addon-Update-Target-List",
+    "Pixel-Props/BetterKnownInstalled",
+    "j-hc/zygisk-detach-app",
+    "d4rken-org/sdmaid-se",
+    "Dev4Mod/WaEnhancer",
+    "5ec1cff/TrickyStore",
+    "osm0sis/PlayIntegrityFork",
+    "Dr-TSNG/ZygiskNext",
+    "reveny/Android-VBMeta-Fixer",
+    "JingMatrix/NeoZygisk"
   ]
 }
