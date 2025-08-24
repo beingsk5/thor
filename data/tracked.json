@@ -29,6 +29,26 @@
     "chsbuffer/ReVancedXposed",
     "siavash79/PixelXpert",
     "snake-4/Zygisk-Assistant",
-    "ZG089/Re-Malwack"
+    "ZG089/Re-Malwack",
+    "pantsufan/BlockAds",
+    "Droid-ify/client",
+    "Magisk-Modules-Alt-Repo/audio-misc-settings",
+    "ReSo7200/InstaEclipse",
+    "Vaz15k/Cubic-AdBlock",
+    "NeoApplications/Neo-Store",
+    "Magisk-Modules-Alt-Repo/systemless-adblocker",
+    "mikropsoft/StevenBlock",
+    "james34602/JamesDSPManager",
+    "bindhosts/bindhosts",
+    "KOWX712/PlayIntegrityFix",
+    "Xposed-Modules-Repo/io.github.wzhy.xaudiocapture",
+    "WSTxda/ViperFX-RE-Releases",
+    "auag0/DisableAudioFocus",
+    "symbuzzer/systemless-hosts-KernelSU-module",
+    "revenge-mod/revenge-xposed",
+    "Magisk-Modules-Alt-Repo/audio-samplerate-changer",
+    "Tornaco/Thanox",
+    "Magisk-Modules-Alt-Repo/audio-jitter-silencer",
+    "Briclyaz/NLSound_module_QCom"
   ]
 }
