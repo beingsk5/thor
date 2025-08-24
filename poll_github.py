@@ -58,54 +58,65 @@ def save_json(file_path, obj):
     with open(file_path, 'w') as f:
         json.dump(obj, f, indent=2)
 
-def get_latest_valid_release(releases):
-    # Returns most recent published release (not draft/prerelease) with tag and published date
-    for rel in releases:
-        if rel.get('draft') or rel.get('prerelease'):
-            continue
-        tag = rel.get("tag_name", "")
-        pub = rel.get("published_at", "")
-        if tag and pub:
-            try:
-                rel_date = datetime.fromisoformat(pub.replace("Z", "+00:00")).date()
-                return tag, rel_date.strftime("%Y-%m-%d"), rel
-            except Exception:
-                continue
-    return "none", "", None
-
-def fetch_latest_release_entry(repo):
+def get_latest_valid_release(repo):
     url = f'https://api.github.com/repos/{repo}/releases'
     try:
         r = requests.get(url)
         if not r.ok:
             return {"repo": repo, "tag": "none", "date": ""}
         releases = r.json()
-        tag, date_str, _ = get_latest_valid_release(releases)
-        return {"repo": repo, "tag": tag, "date": date_str}
+        for rel in releases:
+            if rel.get("draft") or rel.get("prerelease"):
+                continue
+            tag = rel.get("tag_name", "")
+            pub = rel.get("published_at", "")
+            if tag and pub:
+                try:
+                    rel_date = datetime.fromisoformat(pub.replace("Z", "+00:00")).date()
+                    return {"repo": repo, "tag": tag, "date": rel_date.strftime("%Y-%m-%d")}
+                except Exception:
+                    continue
+        return {"repo": repo, "tag": "none", "date": ""}
     except Exception:
         return {"repo": repo, "tag": "none", "date": ""}
 
-def sync_releases_with_tracked(tracked_repos, releases_data):
-    # Build a mapping: repo -> release entry for quick update/removal
-    releases_map = {entry['repo']: entry for entry in releases_data if 'repo' in entry}
-    result = []
-    for repo in tracked_repos:
-        # Update or add the entry for each tracked repo
-        latest_entry = fetch_latest_release_entry(repo)
-        result.append(latest_entry)
-    # No leftover releases: only currently tracked repos are present in result
-    return result
+def update_release_entry(repo):
+    # Update/add one repo's entry in releases.json
+    releases_data = load_json_or_default(RELEASES_FILE, [])
+    releases_map = {r['repo']: r for r in releases_data}
+    entry = get_latest_valid_release(repo)
+    releases_map[repo] = entry
+    new_data = list(releases_map.values())
+    save_json(RELEASES_FILE, new_data)
+
+def remove_release_entry(repo):
+    releases_data = load_json_or_default(RELEASES_FILE, [])
+    new_data = [r for r in releases_data if r['repo'] != repo]
+    save_json(RELEASES_FILE, new_data)
 
 def main():
     today = datetime.now(timezone.utc).date()
     yesterday = today - timedelta(days=1)
-    tracked_data = load_json_or_default(TRACKED_FILE, {'repos': []})
-    tracked_repos = tracked_data.get('repos', [])
+    tracked = load_json_or_default(TRACKED_FILE, {'repos': []})['repos']
     notified = load_json_or_default(NOTIFIED_FILE, {})
     releases_data = load_json_or_default(RELEASES_FILE, [])
 
-    # To notify about new releases and update notified.json
-    for repo in tracked_repos:
+    # Detect additions/removals
+    releases_repos = {r['repo'] for r in releases_data}
+    tracked_set = set(tracked)
+
+    # Add newly tracked repos to releases.json
+    repos_to_add = tracked_set - releases_repos
+    for repo in repos_to_add:
+        update_release_entry(repo)
+
+    # Remove deleted repos from releases.json
+    repos_to_remove = releases_repos - tracked_set
+    for repo in repos_to_remove:
+        remove_release_entry(repo)
+
+    # Check for new releases for tracked repos
+    for repo in tracked:
         url = f'https://api.github.com/repos/{repo}/releases'
         try:
             r = requests.get(url)
@@ -116,7 +127,20 @@ def main():
         except Exception:
             releases = []
 
-        tag, rel_date_str, latest = get_latest_valid_release(releases)
+        tag, rel_date_str, latest = None, None, None
+        for rel in releases:
+            if rel.get('draft') or rel.get('prerelease'):
+                continue
+            t = rel.get("tag_name", "")
+            pub = rel.get("published_at", "")
+            if t and pub:
+                try:
+                    rd = datetime.fromisoformat(pub.replace("Z", "+00:00")).date()
+                    tag, rel_date_str, latest = t, rd.strftime("%Y-%m-%d"), rel
+                    break
+                except Exception:
+                    continue
+
         if latest and rel_date_str:
             rel_date = datetime.strptime(rel_date_str, "%Y-%m-%d").date()
             if rel_date >= yesterday:
@@ -145,12 +169,10 @@ def main():
                             asset["browser_download_url"], asset["name"], caption=caption
                         )
                     notified[repo] = str(latest['id'])
+                    # Only update this repo's entry for new release
+                    update_release_entry(repo)
 
     save_json(NOTIFIED_FILE, notified)
-
-    # Sync releases.json with tracked.json: add, remove, update releases for all tracked repos only
-    synced_releases = sync_releases_with_tracked(tracked_repos, releases_data)
-    save_json(RELEASES_FILE, synced_releases)
 
     # Badge update
     os.makedirs('badge', exist_ok=True)
@@ -158,7 +180,7 @@ def main():
         json.dump({
             'schemaVersion': 1,
             'label': 'tracked repos',
-            'message': str(len(tracked_repos)),
+            'message': str(len(tracked)),
             'color': 'brightgreen'
         }, f)
 
