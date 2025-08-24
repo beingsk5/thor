@@ -14,7 +14,7 @@ from flask import Flask
 from threading import Thread
 from base64 import b64encode, b64decode
 
-# --- Flask keepalive for 24/7 uptime (Replit) ---
+# --- Flask keepalive ---
 app_flask = Flask('')
 
 @app_flask.route('/')
@@ -199,9 +199,9 @@ def remove_release_entry(repo):
     }
     requests.put(url_rel, headers=github_headers(), json=payload)
 
-# --- Helper: auto-delete in private chats ---
-async def delete_trigger_message(update):
-    if update.effective_chat.type == "private":
+# --- Universal AUTO-DELETE for private chat ---
+async def autodelete_private_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if getattr(update, 'message', None) and update.effective_chat.type == "private":
         try:
             await update.message.delete()
         except Exception:
@@ -210,7 +210,6 @@ async def delete_trigger_message(update):
 # --- Bot Handlers ---
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await delete_trigger_message(update)
     keyboard = [
         ["/add", "/remove", "/list", "/releases"],
         ["/about", "/help"]
@@ -222,7 +221,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 async def help_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await delete_trigger_message(update)
     await update.message.reply_text(
         "/add <repo(s)> — Add repo(s)\n"
         "/remove <repo> — Remove repo\n"
@@ -235,7 +233,6 @@ async def help_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 async def about(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await delete_trigger_message(update)
     await update.message.reply_text(
         "🦸 GitHub Release Tracker\n"
         "• Add repos or use commands\n"
@@ -244,18 +241,15 @@ async def about(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 async def ping(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await delete_trigger_message(update)
     await update.message.reply_text("🏓 Bot is alive!")
 
 async def add_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await delete_trigger_message(update)
     if not context.args:
         await update.message.reply_text("Usage: /add <repo(s) or links>")
         return
     await process_repo_addition(update, " ".join(context.args))
 
 async def remove_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await delete_trigger_message(update)
     if not context.args:
         await update.message.reply_text("Usage: /remove <repo>")
         return
@@ -283,7 +277,6 @@ async def remove_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(msg or "Nothing to remove.")
 
 async def any_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await delete_trigger_message(update)
     if update.message.text.startswith('/'):
         return
     await process_repo_addition(update, update.message.text)
@@ -328,7 +321,6 @@ async def process_repo_addition(update, text):
     await update.message.reply_text(msg or "No new repositories added.")
 
 async def list_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await delete_trigger_message(update)
     repos, _ = load_tracked()
     if not repos:
         await update.message.reply_text("No repositories tracked.")
@@ -338,7 +330,6 @@ async def list_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 async def releases_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await delete_trigger_message(update)
     if update.effective_chat.type != "private":
         await update.message.reply_text("⚠️ /releases works only in your personal chat with the bot.")
         return
@@ -387,7 +378,6 @@ async def releases_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await show_releases_page(update, context, page)
 
 async def notify_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await delete_trigger_message(update)
     if not context.args:
         await update.message.reply_text("Usage: /notify <repo>")
         return
@@ -446,7 +436,6 @@ async def notify_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         update_release_entry(repo)
 
 async def clearall_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await delete_trigger_message(update)
     if update.effective_user.id != ADMIN_ID:
         await update.message.reply_text("❌ Only admin can clear all repos!")
         return
@@ -456,6 +445,8 @@ async def clearall_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 if __name__ == '__main__':
     app = ApplicationBuilder().token(BOT_TOKEN).build()
+    # Universal auto-delete for private chat, always runs first!
+    app.add_handler(MessageHandler(filters.ALL, autodelete_private_handler), group=-1)
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("help", help_cmd))
     app.add_handler(CommandHandler("about", about))
