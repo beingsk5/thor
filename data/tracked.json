@@ -1,3 +1,21 @@
 {
-  "repos": []
+  "repos": [
+    "Doze-off/Hide-folders-files",
+    "zhanghai/MaterialFiles",
+    "PranavPurwar/AppLock",
+    "beakthoven/TrickyStoreOSS",
+    "ThePedroo/ReLSPosed",
+    "fatalcoder524/KernelFlasher",
+    "Domi04151309/AlwaysOn",
+    "Mino260806/KeyboardGPT",
+    "Goooler/LawnchairRelease",
+    "Magisk-Modules-Alt-Repo/abootloop",
+    "Magisk-Modules-Alt-Repo/YetAnotherBootloopProtector",
+    "reveny/Android-Native-Root-Detector",
+    "Magisk-Modules-Repo/callrecorder-skvalex",
+    "ineffablexd/Ineffable-Hub",
+    "99keshav99/CaptureSposed",
+    "LSPosed/CorePatch",
+    "ahmedmani/pairipfix"
+  ]
 }
