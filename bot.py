@@ -26,7 +26,7 @@ def run_flask():
 
 Thread(target=run_flask).start()
 
-# --- Telegram bot main setup ---
+# --- Config and constants ---
 BOT_TOKEN = os.environ['BOT_TOKEN']
 GITHUB_OWNER = os.environ['GITHUB_OWNER']
 GITHUB_REPO = os.environ['GITHUB_REPO']
@@ -128,33 +128,114 @@ def save_notified(notified, sha):
     r.raise_for_status()
     return r.json()['content']['sha']
 
+# --- Releases.json update helpers ---
+def update_release_entry(repo):
+    url = f"https://api.github.com/repos/{repo}/releases"
+    try:
+        r = requests.get(url)
+        if not r.ok:
+            entry = {"repo": repo, "tag": "none", "date": ""}
+        else:
+            releases = r.json()
+            for rel in releases:
+                if rel.get("draft") or rel.get("prerelease"):
+                    continue
+                tag = rel.get("tag_name", "")
+                pub = rel.get("published_at", "")
+                if tag and pub:
+                    try:
+                        rel_date = datetime.fromisoformat(pub.replace("Z", "+00:00")).date()
+                        entry = {"repo": repo, "tag": tag, "date": rel_date.strftime("%Y-%m-%d")}
+                        break
+                    except Exception:
+                        continue
+            else:
+                entry = {"repo": repo, "tag": "none", "date": ""}
+    except Exception:
+        entry = {"repo": repo, "tag": "none", "date": ""}
+
+    url_rel = github_file_url(RELEASES_DATA_PATH)
+    r_rel = requests.get(url_rel, headers=github_headers())
+    if r_rel.status_code == 404:
+        releases_data = []
+        sha = None
+    else:
+        r_rel.raise_for_status()
+        content_rel = r_rel.json()
+        try:
+            releases_data = json.loads(b64decode(content_rel["content"] + '===').decode())
+        except Exception:
+            releases_data = []
+        sha = content_rel["sha"]
+    releases_map = {r['repo']: r for r in releases_data if 'repo' in r}
+    releases_map[repo] = entry
+    new_data = list(releases_map.values())
+    payload = {
+        "message": f"Update releases.json for {repo}",
+        "content": b64encode(json.dumps(new_data, indent=2).encode()).decode(),
+        "sha": sha
+    }
+    requests.put(url_rel, headers=github_headers(), json=payload)
+
+def remove_release_entry(repo):
+    url_rel = github_file_url(RELEASES_DATA_PATH)
+    r_rel = requests.get(url_rel, headers=github_headers())
+    if r_rel.status_code == 404:
+        releases_data = []
+        sha = None
+    else:
+        r_rel.raise_for_status()
+        content_rel = r_rel.json()
+        try:
+            releases_data = json.loads(b64decode(content_rel["content"] + '===').decode())
+        except Exception:
+            releases_data = []
+        sha = content_rel["sha"]
+    new_data = [r for r in releases_data if r['repo'] != repo]
+    payload = {
+        "message": f"Remove {repo} from releases.json",
+        "content": b64encode(json.dumps(new_data, indent=2).encode()).decode(),
+        "sha": sha
+    }
+    requests.put(url_rel, headers=github_headers(), json=payload)
+
+# --- Helper: auto-delete in private chats ---
+async def delete_trigger_message(update):
+    if update.effective_chat.type == "private":
+        try:
+            await update.message.delete()
+        except Exception:
+            pass
+
 # --- Bot Handlers ---
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await delete_trigger_message(update)
     keyboard = [
         ["/add", "/remove", "/list", "/releases"],
-        ["/chart", "/about", "/help"]
+        ["/about", "/help"]
     ]
     await update.message.reply_text(
-        "👋 Hi! Paste GitHub repos or use /add /remove /list /chart commands.\n"
+        "👋 Hi! Paste GitHub repos or use /add /remove /list commands.\n"
         "Send multiple repos using space, comma, or newline.",
         reply_markup=ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     )
 
 async def help_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await delete_trigger_message(update)
     await update.message.reply_text(
         "/add <repo(s)> — Add repo(s)\n"
         "/remove <repo> — Remove repo\n"
         "/list — Show tracked repos\n"
         "/releases — Paginated release log (private chat only)\n"
         "/notify <repo> — Manually notify channel AND update notified.json\n"
-        "/chart — Release chart (text)\n"
         "/about — About\n"
         "/clearall — Clear all (admin)\n"
         "/ping — Check bot"
     )
 
 async def about(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await delete_trigger_message(update)
     await update.message.reply_text(
         "🦸 GitHub Release Tracker\n"
         "• Add repos or use commands\n"
@@ -163,15 +244,18 @@ async def about(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 async def ping(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await delete_trigger_message(update)
     await update.message.reply_text("🏓 Bot is alive!")
 
 async def add_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await delete_trigger_message(update)
     if not context.args:
         await update.message.reply_text("Usage: /add <repo(s) or links>")
         return
     await process_repo_addition(update, " ".join(context.args))
 
 async def remove_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await delete_trigger_message(update)
     if not context.args:
         await update.message.reply_text("Usage: /remove <repo>")
         return
@@ -189,6 +273,8 @@ async def remove_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
             not_found.append(repo)
     if actually_removed:
         save_tracked(repos, sha)
+        for repo in actually_removed:
+            remove_release_entry(repo)
     msg = ""
     if actually_removed:
         msg += "❌ Removed:\n" + "\n".join(actually_removed)
@@ -197,6 +283,7 @@ async def remove_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(msg or "Nothing to remove.")
 
 async def any_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await delete_trigger_message(update)
     if update.message.text.startswith('/'):
         return
     await process_repo_addition(update, update.message.text)
@@ -229,6 +316,8 @@ async def process_repo_addition(update, text):
             failed.append(f"{repo} (error: {str(e)})")
     if added:
         save_tracked(repos, sha)
+        for repo in added:
+            update_release_entry(repo)
     msg = ""
     if added:
         msg += "✅ Added:\n" + "\n".join(added)
@@ -239,6 +328,7 @@ async def process_repo_addition(update, text):
     await update.message.reply_text(msg or "No new repositories added.")
 
 async def list_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await delete_trigger_message(update)
     repos, _ = load_tracked()
     if not repos:
         await update.message.reply_text("No repositories tracked.")
@@ -247,8 +337,8 @@ async def list_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "📋 Tracked repos:\n" + "\n".join(f"- `{r}`" for r in repos), parse_mode="Markdown"
     )
 
-# --- /releases: List from data/releases.json ---
 async def releases_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await delete_trigger_message(update)
     if update.effective_chat.type != "private":
         await update.message.reply_text("⚠️ /releases works only in your personal chat with the bot.")
         return
@@ -297,6 +387,7 @@ async def releases_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await show_releases_page(update, context, page)
 
 async def notify_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await delete_trigger_message(update)
     if not context.args:
         await update.message.reply_text("Usage: /notify <repo>")
         return
@@ -352,36 +443,10 @@ async def notify_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if latest and tag and "id" in latest:
         notified[repo] = str(latest["id"])
         save_notified(notified, sha)
-
-async def chart_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    repos, _ = load_tracked()
-    if not repos:
-        await update.message.reply_text("No repos tracked for chart.")
-        return
-    release_counts = {}
-    for repo in repos:
-        url = f"https://api.github.com/repos/{repo}/releases"
-        releases = []
-        try:
-            resp = requests.get(url)
-            if resp.ok:
-                releases = resp.json()
-        except Exception:
-            continue
-        months = [r.get("published_at", "")[:7] for r in releases if "published_at" in r]
-        for month in months:
-            if month:
-                release_counts[month] = release_counts.get(month, 0) + 1
-    if not release_counts:
-        await update.message.reply_text("No release history yet.")
-        return
-    months = sorted(release_counts)
-    msg = "📊 <b>Release count per month:</b>\n"
-    for m in months:
-        msg += f"{m}: {release_counts[m]}\n"
-    await update.message.reply_text(msg, parse_mode="HTML")
+        update_release_entry(repo)
 
 async def clearall_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await delete_trigger_message(update)
     if update.effective_user.id != ADMIN_ID:
         await update.message.reply_text("❌ Only admin can clear all repos!")
         return
@@ -401,7 +466,6 @@ if __name__ == '__main__':
     app.add_handler(CommandHandler("releases", releases_cmd))
     app.add_handler(CommandHandler("notify", notify_cmd))
     app.add_handler(CommandHandler("clearall", clearall_cmd))
-    app.add_handler(CommandHandler("chart", chart_cmd))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, any_message))
     app.add_handler(CallbackQueryHandler(releases_callback, pattern=r"rel_page:\d+"))
     app.run_polling()
