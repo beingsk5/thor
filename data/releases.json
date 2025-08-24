@@ -283,5 +283,95 @@
     "repo": "james34602/JamesDSPManager",
     "tag": "28Nov2023",
     "date": "2023-12-02"
+  },
+  {
+    "repo": "snake-4/Zygisk-Assistant",
+    "tag": "v2.1.4",
+    "date": "2025-02-23"
+  },
+  {
+    "repo": "re-zero001/LSPosed-Irena",
+    "tag": "1.9.2",
+    "date": "2024-10-17"
+  },
+  {
+    "repo": "ZG089/Re-Malwack",
+    "tag": "v6.0",
+    "date": "2025-03-31"
+  },
+  {
+    "repo": "dpejoh/yurikey",
+    "tag": "v1.8",
+    "date": "2025-08-20"
+  },
+  {
+    "repo": "chsbuffer/ReVancedXposed",
+    "tag": "1.0.24",
+    "date": "2025-08-22"
+  },
+  {
+    "repo": "siavash79/PixelXpert",
+    "tag": "v5.0.0",
+    "date": "2025-08-22"
+  },
+  {
+    "repo": "pumPCin/HMAL",
+    "tag": "V4.1.1.r62",
+    "date": "2024-12-23"
+  },
+  {
+    "repo": "chenxiaolong/BCR",
+    "tag": "v1.79",
+    "date": "2025-07-26"
+  },
+  {
+    "repo": "Dr-TSNG/Hide-My-Applist",
+    "tag": "V3.5",
+    "date": "2025-06-28"
+  },
+  {
+    "repo": "j-hc/FlagSecurePatcher",
+    "tag": "r15",
+    "date": "2025-04-03"
+  },
+  {
+    "repo": "LSPosed/LSPosed.github.io",
+    "tag": "shamiko-414",
+    "date": "2025-06-18"
+  },
+  {
+    "repo": "d4rken-org/sdmaid-se",
+    "tag": "v1.4.15-rc0",
+    "date": "2025-07-03"
+  },
+  {
+    "repo": "vvb2060/KeyAttestation",
+    "tag": "v1.8.4",
+    "date": "2025-01-16"
+  },
+  {
+    "repo": "EricInacio01/PlayIntegrityFix-NEXT",
+    "tag": "v3.0-release",
+    "date": "2025-08-09"
+  },
+  {
+    "repo": "MhmRdd/NoHello",
+    "tag": "0.0.7",
+    "date": "2025-05-31"
+  },
+  {
+    "repo": "sidex15/susfs4ksu-module",
+    "tag": "v1.5.2+_R20",
+    "date": "2025-07-06"
+  },
+  {
+    "repo": "PerformanC/ReZygisk",
+    "tag": "v1.0.0-rc.3",
+    "date": "2025-07-14"
+  },
+  {
+    "repo": "j-hc/zygisk-detach",
+    "tag": "v1.20.1",
+    "date": "2025-06-01"
   }
 ]
