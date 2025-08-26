@@ -433,5 +433,10 @@
     "repo": "Pixel-Props/BetterKnownInstalled",
     "tag": "1337",
     "date": "2025-02-06"
+  },
+  {
+    "repo": "deniscerri/ytdlnis",
+    "tag": "v1.8.5",
+    "date": "2025-07-28"
   }
 ]
