@@ -458,5 +458,10 @@
     "repo": "Gustyx-Power/Xtra-Kernel-Manager",
     "tag": "release-stable-v1.4",
     "date": "2025-09-06"
+  },
+  {
+    "repo": "frknkrc44/HMA-OSS",
+    "tag": "oss-116",
+    "date": "2025-10-03"
   }
 ]
