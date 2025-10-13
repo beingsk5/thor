@@ -483,5 +483,10 @@
     "repo": "himanshujjp/PlayStoreSelfUpdateBlocker",
     "tag": "v2.0",
     "date": "2025-09-17"
+  },
+  {
+    "repo": "rhythmcache/partition-backup",
+    "tag": "V2",
+    "date": "2025-07-01"
   }
 ]
