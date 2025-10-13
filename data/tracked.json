@@ -96,6 +96,7 @@
     "MMRLApp/MMRL",
     "MMRLApp/WebUI-X-Portable",
     "MeowDump/Integrity-Box",
-    "himanshujjp/PlayStoreSelfUpdateBlocker"
+    "himanshujjp/PlayStoreSelfUpdateBlocker",
+    "rhythmcache/partition-backup"
   ]
 }
