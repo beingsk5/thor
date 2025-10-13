@@ -488,5 +488,10 @@
     "repo": "rhythmcache/partition-backup",
     "tag": "V2",
     "date": "2025-07-01"
+  },
+  {
+    "repo": "ArzJo/Camaleon",
+    "tag": "v1.5.1",
+    "date": "2025-05-17"
   }
 ]
