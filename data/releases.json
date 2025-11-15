@@ -533,5 +533,10 @@
     "repo": "cygnusx-1-org/continuum",
     "tag": "8.0.7.3",
     "date": "2025-11-09"
+  },
+  {
+    "repo": "albu-razvan/Stario",
+    "tag": "v2.11",
+    "date": "2025-11-09"
   }
 ]
