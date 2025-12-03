@@ -573,5 +573,10 @@
     "repo": "memstechtips/UnattendedWinstall",
     "tag": "v3.0.0",
     "date": "2025-11-14"
+  },
+  {
+    "repo": "j-hc/revanced-magisk-module",
+    "tag": "20221033",
+    "date": "2025-11-10"
   }
 ]
