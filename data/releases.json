@@ -563,5 +563,10 @@
     "repo": "YuzakiKokuban/meta-hybrid_mount",
     "tag": "v0.2.8-r12",
     "date": "2025-12-02"
+  },
+  {
+    "repo": "ShivamXD6/Simple-Flag-Secure",
+    "tag": "v5",
+    "date": "2025-10-23"
   }
 ]
