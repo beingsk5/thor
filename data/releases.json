@@ -558,5 +558,10 @@
     "repo": "JingMatrix/TEESimulator",
     "tag": "v2.1",
     "date": "2025-11-28"
+  },
+  {
+    "repo": "YuzakiKokuban/meta-hybrid_mount",
+    "tag": "v0.2.8-r12",
+    "date": "2025-12-02"
   }
 ]
