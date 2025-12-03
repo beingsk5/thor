@@ -341,8 +341,8 @@
   },
   {
     "repo": "d4rken-org/sdmaid-se",
-    "tag": "v1.5.4-rc0",
-    "date": "2025-11-11"
+    "tag": "v1.5.5-rc0",
+    "date": "2025-12-03"
   },
   {
     "repo": "vvb2060/KeyAttestation",
@@ -561,8 +561,8 @@
   },
   {
     "repo": "YuzakiKokuban/meta-hybrid_mount",
-    "tag": "v0.2.8-r12",
-    "date": "2025-12-02"
+    "tag": "v0.2.8-r13",
+    "date": "2025-12-03"
   },
   {
     "repo": "ShivamXD6/Simple-Flag-Secure",
