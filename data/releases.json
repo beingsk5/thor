@@ -583,5 +583,10 @@
     "repo": "Numbersf/MakeFontsGreatAgain",
     "tag": "1605102305",
     "date": "2025-12-01"
+  },
+  {
+    "repo": "KernelSU-Modules-Repo/meta-overlayfs",
+    "tag": "v1.3.1",
+    "date": "2025-12-02"
   }
 ]
