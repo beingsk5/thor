@@ -121,6 +121,7 @@
     "Seyud/FreePPS",
     "Seyud/device_faker",
     "Seyud/Mediatek_Mali_GPU_Governor",
-    "KernelSU-Modules-Repo/deviceidchanger"
+    "KernelSU-Modules-Repo/deviceidchanger",
+    "ukriu/HyperUnlocked"
   ]
 }
