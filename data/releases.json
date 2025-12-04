@@ -608,5 +608,10 @@
     "repo": "KernelSU-Modules-Repo/deviceidchanger",
     "tag": "v1.2.1",
     "date": "2025-11-30"
+  },
+  {
+    "repo": "ukriu/HyperUnlocked",
+    "tag": "v2.1.2",
+    "date": "2025-11-30"
   }
 ]
