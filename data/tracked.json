@@ -116,6 +116,7 @@
     "ShivamXD6/Simple-Flag-Secure",
     "memstechtips/UnattendedWinstall",
     "j-hc/revanced-magisk-module",
-    "Numbersf/MakeFontsGreatAgain"
+    "Numbersf/MakeFontsGreatAgain",
+    "KernelSU-Modules-Repo/meta-overlayfs"
   ]
 }
