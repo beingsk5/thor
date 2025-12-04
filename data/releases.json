@@ -588,5 +588,10 @@
     "repo": "KernelSU-Modules-Repo/meta-overlayfs",
     "tag": "v1.3.1",
     "date": "2025-12-02"
+  },
+  {
+    "repo": "Seyud/FreePPS",
+    "tag": "v1.5.0",
+    "date": "2025-11-30"
   }
 ]
