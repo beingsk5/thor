@@ -578,5 +578,10 @@
     "repo": "j-hc/revanced-magisk-module",
     "tag": "20221033",
     "date": "2025-11-10"
+  },
+  {
+    "repo": "Numbersf/MakeFontsGreatAgain",
+    "tag": "1605102305",
+    "date": "2025-12-01"
   }
 ]
