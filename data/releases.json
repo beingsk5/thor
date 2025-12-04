@@ -593,5 +593,10 @@
     "repo": "Seyud/FreePPS",
     "tag": "v1.5.0",
     "date": "2025-11-30"
+  },
+  {
+    "repo": "Seyud/device_faker",
+    "tag": "v1.1.0",
+    "date": "2025-11-09"
   }
 ]
