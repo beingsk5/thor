@@ -72,5 +72,6 @@
   "memstechtips/UnattendedWinstall": "261086861",
   "YuzakiKokuban/meta-hybrid_mount": "267249049",
   "Numbersf/MakeFontsGreatAgain": "266253105",
-  "KernelSU-Modules-Repo/meta-overlayfs": "266718219"
+  "KernelSU-Modules-Repo/meta-overlayfs": "266718219",
+  "Seyud/FreePPS": "266189941"
 }
