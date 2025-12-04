@@ -117,6 +117,7 @@
     "memstechtips/UnattendedWinstall",
     "j-hc/revanced-magisk-module",
     "Numbersf/MakeFontsGreatAgain",
-    "KernelSU-Modules-Repo/meta-overlayfs"
+    "KernelSU-Modules-Repo/meta-overlayfs",
+    "Seyud/FreePPS"
   ]
 }
