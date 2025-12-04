@@ -598,5 +598,10 @@
     "repo": "Seyud/device_faker",
     "tag": "v1.1.0",
     "date": "2025-11-09"
+  },
+  {
+    "repo": "Seyud/Mediatek_Mali_GPU_Governor",
+    "tag": "v2.11.0",
+    "date": "2025-11-30"
   }
 ]
