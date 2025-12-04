@@ -119,6 +119,7 @@
     "Numbersf/MakeFontsGreatAgain",
     "KernelSU-Modules-Repo/meta-overlayfs",
     "Seyud/FreePPS",
-    "Seyud/device_faker"
+    "Seyud/device_faker",
+    "Seyud/Mediatek_Mali_GPU_Governor"
   ]
 }
