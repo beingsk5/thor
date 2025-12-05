@@ -124,6 +124,7 @@
     "KernelSU-Modules-Repo/deviceidchanger",
     "ukriu/HyperUnlocked",
     "backslashxx/mountify",
-    "7a72/meta-magic_mount"
+    "7a72/meta-magic_mount",
+    "Tools-cx-app/meta-magic_mount"
   ]
 }
