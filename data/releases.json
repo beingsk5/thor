@@ -623,5 +623,10 @@
     "repo": "7a72/meta-magic_mount",
     "tag": "v0.2.2",
     "date": "2025-11-26"
+  },
+  {
+    "repo": "Tools-cx-app/meta-magic_mount",
+    "tag": "v1.0.1",
+    "date": "2025-12-05"
   }
 ]
