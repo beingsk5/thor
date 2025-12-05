@@ -618,5 +618,10 @@
     "repo": "backslashxx/mountify",
     "tag": "186",
     "date": "2025-12-04"
+  },
+  {
+    "repo": "7a72/meta-magic_mount",
+    "tag": "v0.2.2",
+    "date": "2025-11-26"
   }
 ]
