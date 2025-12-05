@@ -123,6 +123,7 @@
     "Seyud/Mediatek_Mali_GPU_Governor",
     "KernelSU-Modules-Repo/deviceidchanger",
     "ukriu/HyperUnlocked",
-    "backslashxx/mountify"
+    "backslashxx/mountify",
+    "7a72/meta-magic_mount"
   ]
 }
