@@ -306,8 +306,8 @@
   },
   {
     "repo": "chsbuffer/ReVancedXposed",
-    "tag": "1.0.34",
-    "date": "2025-12-03"
+    "tag": "1.0.35",
+    "date": "2025-12-06"
   },
   {
     "repo": "siavash79/PixelXpert",
@@ -561,8 +561,8 @@
   },
   {
     "repo": "YuzakiKokuban/meta-hybrid_mount",
-    "tag": "v1.0.1-r2",
-    "date": "2025-12-05"
+    "tag": "none",
+    "date": ""
   },
   {
     "repo": "ShivamXD6/Simple-Flag-Secure",
@@ -626,8 +626,8 @@
   },
   {
     "repo": "Tools-cx-app/meta-magic_mount",
-    "tag": "v1.0.1",
-    "date": "2025-12-05"
+    "tag": "v1.0.2",
+    "date": "2025-12-06"
   },
   {
     "repo": "sunilpaulmathew/De-Bloater",
