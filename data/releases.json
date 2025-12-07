@@ -561,8 +561,8 @@
   },
   {
     "repo": "YuzakiKokuban/meta-hybrid_mount",
-    "tag": "none",
-    "date": ""
+    "tag": "v1.0.3-r1",
+    "date": "2025-12-07"
   },
   {
     "repo": "ShivamXD6/Simple-Flag-Secure",
@@ -626,7 +626,7 @@
   },
   {
     "repo": "Tools-cx-app/meta-magic_mount",
-    "tag": "v1.0.2",
+    "tag": "v1.0.3",
     "date": "2025-12-06"
   },
   {
