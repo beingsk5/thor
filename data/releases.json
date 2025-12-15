@@ -638,5 +638,10 @@
     "repo": "chisewaguri/systemapp_nuker",
     "tag": "v1.1.9",
     "date": "2025-10-12"
+  },
+  {
+    "repo": "AKS-Labs/CircleToSearch",
+    "tag": "v0.2",
+    "date": "2025-12-08"
   }
 ]
