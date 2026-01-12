@@ -82,7 +82,7 @@
   "7a72/meta-magic_mount": "265313189",
   "Tools-cx-app/meta-magic_mount": "275811562",
   "ZUANVFX01/ZKM": "267006173",
-  "AKS-Labs/CircleToSearch": "275572055",
+  "AKS-Labs/CircleToSearch": "275862106",
   "j-hc/revanced-magisk-module": "271534630",
   "trinadhthatakula/Bolt": "232068728",
   "LSPosed/CorePatch": "272689548",
@@ -90,5 +90,6 @@
   "Magisk-Modules-Alt-Repo/audio-samplerate-changer": "273554604",
   "AlirezaParsi/COPG": "273596314",
   "Drsexo/Greenify4Magisk-KSU-Reborn": "273820622",
-  "MorpheApp/morphe-manager": "275728118"
+  "MorpheApp/morphe-manager": "275728118",
+  "Universal-Debloater-Alliance/universal-android-debloater-next-generation": "276015059"
 }
