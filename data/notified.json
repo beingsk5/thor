@@ -70,7 +70,7 @@
   "T8RIN/ImageToolbox": "272944279",
   "ShivamXD6/Simple-Flag-Secure": "256760455",
   "memstechtips/UnattendedWinstall": "261086861",
-  "YuzakiKokuban/meta-hybrid_mount": "276777626",
+  "YuzakiKokuban/meta-hybrid_mount": "277116277",
   "Numbersf/MakeFontsGreatAgain": "266253105",
   "KernelSU-Modules-Repo/meta-overlayfs": "266718219",
   "Seyud/FreePPS": "273705492",
@@ -92,5 +92,6 @@
   "Drsexo/Greenify4Magisk-KSU-Reborn": "273820622",
   "MorpheApp/morphe-manager": "275728118",
   "Universal-Debloater-Alliance/universal-android-debloater-next-generation": "276015059",
-  "DP-Hridayan/aShellYou": "276954400"
+  "DP-Hridayan/aShellYou": "276954400",
+  "albu-razvan/Stario": "277136121"
 }
