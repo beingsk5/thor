@@ -496,8 +496,8 @@
   },
   {
     "repo": "rikkahub/rikkahub",
-    "tag": "none",
-    "date": ""
+    "tag": "1.7.10",
+    "date": "2026-01-15"
   },
   {
     "repo": "libre-tube/LibreTube",
@@ -546,8 +546,8 @@
   },
   {
     "repo": "DP-Hridayan/aShellYou",
-    "tag": "v6.1.0",
-    "date": "2025-04-23"
+    "tag": "v7.0.1",
+    "date": "2026-01-15"
   },
   {
     "repo": "JingMatrix/TEESimulator",
@@ -556,7 +556,7 @@
   },
   {
     "repo": "YuzakiKokuban/meta-hybrid_mount",
-    "tag": "v2.0.5",
+    "tag": "v2.0.51",
     "date": "2026-01-14"
   },
   {
