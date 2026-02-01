@@ -211,8 +211,8 @@
   },
   {
     "repo": "revenge-mod/revenge-xposed",
-    "tag": "1409",
-    "date": "2025-11-23"
+    "tag": "1410",
+    "date": "2026-02-01"
   },
   {
     "repo": "Droid-ify/client",
@@ -386,8 +386,8 @@
   },
   {
     "repo": "JingMatrix/LSPosed",
-    "tag": "v1.10.2",
-    "date": "2025-07-12"
+    "tag": "v1.11.0",
+    "date": "2026-01-31"
   },
   {
     "repo": "JingMatrix/NeoZygisk",
@@ -556,8 +556,8 @@
   },
   {
     "repo": "YuzakiKokuban/meta-hybrid_mount",
-    "tag": "v2.4.1",
-    "date": "2026-01-29"
+    "tag": "v2.5.0",
+    "date": "2026-02-01"
   },
   {
     "repo": "ShivamXD6/Simple-Flag-Secure",
