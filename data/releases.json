@@ -556,8 +556,8 @@
   },
   {
     "repo": "YuzakiKokuban/meta-hybrid_mount",
-    "tag": "v3.0.1",
-    "date": "2026-02-05"
+    "tag": "v3.0.13",
+    "date": "2026-02-08"
   },
   {
     "repo": "ShivamXD6/Simple-Flag-Secure",
@@ -661,7 +661,7 @@
   },
   {
     "repo": "MorpheApp/morphe-manager",
-    "tag": "v1.5.0",
-    "date": "2026-02-04"
+    "tag": "v1.6.0",
+    "date": "2026-02-08"
   }
 ]
