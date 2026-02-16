@@ -571,8 +571,8 @@
   },
   {
     "repo": "j-hc/revanced-magisk-module",
-    "tag": "20221036",
-    "date": "2026-01-19"
+    "tag": "20221037",
+    "date": "2026-02-16"
   },
   {
     "repo": "Numbersf/MakeFontsGreatAgain",
@@ -661,7 +661,7 @@
   },
   {
     "repo": "MorpheApp/morphe-manager",
-    "tag": "v1.7.0",
+    "tag": "v1.7.1",
     "date": "2026-02-16"
   }
 ]
