@@ -556,8 +556,8 @@
   },
   {
     "repo": "YuzakiKokuban/meta-hybrid_mount",
-    "tag": "v3.1.4",
-    "date": "2026-02-27"
+    "tag": "v3.1.5",
+    "date": "2026-03-01"
   },
   {
     "repo": "ShivamXD6/Simple-Flag-Secure",
@@ -576,8 +576,8 @@
   },
   {
     "repo": "Numbersf/MakeFontsGreatAgain",
-    "tag": "1611022601",
-    "date": "2026-02-27"
+    "tag": "none",
+    "date": ""
   },
   {
     "repo": "KernelSU-Modules-Repo/meta-overlayfs",
