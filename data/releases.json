@@ -371,8 +371,8 @@
   },
   {
     "repo": "j-hc/zygisk-detach",
-    "tag": "v1.21.0",
-    "date": "2026-02-07"
+    "tag": "v1.22.0",
+    "date": "2026-03-05"
   },
   {
     "repo": "Dev4Mod/WaEnhancer",
@@ -496,8 +496,8 @@
   },
   {
     "repo": "rikkahub/rikkahub",
-    "tag": "2.1.0",
-    "date": "2026-03-04"
+    "tag": "2.1.1",
+    "date": "2026-03-05"
   },
   {
     "repo": "libre-tube/LibreTube",
