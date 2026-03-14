@@ -496,8 +496,8 @@
   },
   {
     "repo": "rikkahub/rikkahub",
-    "tag": "2.1.2",
-    "date": "2026-03-09"
+    "tag": "2.1.3",
+    "date": "2026-03-14"
   },
   {
     "repo": "libre-tube/LibreTube",
@@ -531,8 +531,8 @@
   },
   {
     "repo": "albu-razvan/Stario",
-    "tag": "v2.13",
-    "date": "2026-01-16"
+    "tag": "v2.14",
+    "date": "2026-03-14"
   },
   {
     "repo": "T8RIN/ImageToolbox",
@@ -596,8 +596,8 @@
   },
   {
     "repo": "Seyud/Mediatek_Mali_GPU_Governor",
-    "tag": "v2.12.0",
-    "date": "2026-01-31"
+    "tag": "none",
+    "date": ""
   },
   {
     "repo": "KernelSU-Modules-Repo/deviceidchanger",
