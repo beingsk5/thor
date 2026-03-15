@@ -556,8 +556,8 @@
   },
   {
     "repo": "YuzakiKokuban/meta-hybrid_mount",
-    "tag": "v3.1.5",
-    "date": "2026-03-01"
+    "tag": "v3.1.6",
+    "date": "2026-03-15"
   },
   {
     "repo": "ShivamXD6/Simple-Flag-Secure",
@@ -576,8 +576,8 @@
   },
   {
     "repo": "Numbersf/MakeFontsGreatAgain",
-    "tag": "none",
-    "date": ""
+    "tag": "1622031503",
+    "date": "2026-03-15"
   },
   {
     "repo": "KernelSU-Modules-Repo/meta-overlayfs",
@@ -611,8 +611,8 @@
   },
   {
     "repo": "backslashxx/mountify",
-    "tag": "192",
-    "date": "2026-02-19"
+    "tag": "194",
+    "date": "2026-03-14"
   },
   {
     "repo": "7a72/meta-magic_mount",
