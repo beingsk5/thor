@@ -576,8 +576,8 @@
   },
   {
     "repo": "Numbersf/MakeFontsGreatAgain",
-    "tag": "1622031503",
-    "date": "2026-03-15"
+    "tag": "1623032005",
+    "date": "2026-03-20"
   },
   {
     "repo": "KernelSU-Modules-Repo/meta-overlayfs",
@@ -591,8 +591,8 @@
   },
   {
     "repo": "Seyud/device_faker",
-    "tag": "v1.3.0",
-    "date": "2026-01-21"
+    "tag": "v1.3.5",
+    "date": "2026-03-20"
   },
   {
     "repo": "Seyud/Mediatek_Mali_GPU_Governor",
