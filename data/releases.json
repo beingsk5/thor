@@ -186,8 +186,8 @@
   },
   {
     "repo": "KOWX712/PlayIntegrityFix",
-    "tag": "v4.4-inject-s",
-    "date": "2025-11-02"
+    "tag": "v4.5-inject-s",
+    "date": "2026-03-28"
   },
   {
     "repo": "Magisk-Modules-Alt-Repo/audio-samplerate-changer",
@@ -361,8 +361,8 @@
   },
   {
     "repo": "sidex15/susfs4ksu-module",
-    "tag": "v1.5.2+_R26",
-    "date": "2026-03-06"
+    "tag": "v1.5.2+_R27",
+    "date": "2026-03-27"
   },
   {
     "repo": "PerformanC/ReZygisk",
