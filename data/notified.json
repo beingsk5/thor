@@ -90,7 +90,7 @@
   "Magisk-Modules-Alt-Repo/audio-samplerate-changer": "305240918",
   "AlirezaParsi/COPG": "273596314",
   "Drsexo/Greenify4Magisk-KSU-Reborn": "286880474",
-  "MorpheApp/morphe-manager": "302918128",
+  "MorpheApp/morphe-manager": "306517244",
   "Universal-Debloater-Alliance/universal-android-debloater-next-generation": "276015059",
   "DP-Hridayan/aShellYou": "277437108",
   "albu-razvan/Stario": "297206619",
@@ -100,5 +100,6 @@
   "Magisk-Modules-Repo/callrecorder-skvalex": "291637482",
   "NoWakeLock/NoWakeLock": "297101763",
   "Keinta15/Magisk-iOS-Emoji": "301339721",
-  "Magisk-Modules-Alt-Repo/YetAnotherBootloopProtector": "305959968"
+  "Magisk-Modules-Alt-Repo/YetAnotherBootloopProtector": "305959968",
+  "sunilpaulmathew/De-Bloater": "306330279"
 }
