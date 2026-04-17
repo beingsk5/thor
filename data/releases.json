@@ -636,8 +636,8 @@
   },
   {
     "repo": "AKS-Labs/CircleToSearch",
-    "tag": "v0.4",
-    "date": "2026-01-11"
+    "tag": "v0.5",
+    "date": "2026-04-17"
   },
   {
     "repo": "ZUANVFX01/ZKM",
@@ -661,7 +661,7 @@
   },
   {
     "repo": "MorpheApp/morphe-manager",
-    "tag": "v1.14.0",
-    "date": "2026-04-08"
+    "tag": "v1.15.0",
+    "date": "2026-04-17"
   }
 ]
