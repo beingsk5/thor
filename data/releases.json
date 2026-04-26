@@ -366,8 +366,8 @@
   },
   {
     "repo": "PerformanC/ReZygisk",
-    "tag": "v1.0.0-rc.7",
-    "date": "2026-04-02"
+    "tag": "v1.0.0-rc.8",
+    "date": "2026-04-26"
   },
   {
     "repo": "j-hc/zygisk-detach",
@@ -496,8 +496,8 @@
   },
   {
     "repo": "rikkahub/rikkahub",
-    "tag": "2.1.10",
-    "date": "2026-04-24"
+    "tag": "2.1.11",
+    "date": "2026-04-26"
   },
   {
     "repo": "libre-tube/LibreTube",
