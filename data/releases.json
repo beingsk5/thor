@@ -496,8 +496,8 @@
   },
   {
     "repo": "rikkahub/rikkahub",
-    "tag": "2.1.12",
-    "date": "2026-04-30"
+    "tag": "2.2.0",
+    "date": "2026-05-10"
   },
   {
     "repo": "libre-tube/LibreTube",
@@ -526,8 +526,8 @@
   },
   {
     "repo": "cygnusx-1-org/continuum",
-    "tag": "8.1.4.7",
-    "date": "2026-05-03"
+    "tag": "8.2.1.1",
+    "date": "2026-05-10"
   },
   {
     "repo": "albu-razvan/Stario",
@@ -556,8 +556,8 @@
   },
   {
     "repo": "YuzakiKokuban/meta-hybrid_mount",
-    "tag": "v3.6.1",
-    "date": "2026-05-06"
+    "tag": "v4.0.1",
+    "date": "2026-05-10"
   },
   {
     "repo": "ShivamXD6/Simple-Flag-Secure",
@@ -661,7 +661,7 @@
   },
   {
     "repo": "MorpheApp/morphe-manager",
-    "tag": "none",
-    "date": ""
+    "tag": "v1.17.0",
+    "date": "2026-05-10"
   }
 ]
