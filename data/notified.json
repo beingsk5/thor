@@ -58,7 +58,7 @@
   "Dr-TSNG/ZygiskNext": "306450628",
   "Magisk-Modules-Alt-Repo/video-to-bootanimation": "260928445",
   "FBIVIP/Play-IntegrityFix": "265809777",
-  "rikkahub/rikkahub": "320090911",
+  "rikkahub/rikkahub": "322419147",
   "libre-tube/LibreTube": "311800073",
   "Anthonyy232/Paperize": "247419580",
   "CompassMB/MBCompass": "316682913",
@@ -67,7 +67,7 @@
   "cygnusx-1-org/continuum": "320078996",
   "deltazefiro/Amarok-Hider": "290163277",
   "JingMatrix/TEESimulator": "294233508",
-  "T8RIN/ImageToolbox": "307234617",
+  "T8RIN/ImageToolbox": "322702104",
   "ShivamXD6/Simple-Flag-Secure": "256760455",
   "memstechtips/UnattendedWinstall": "261086861",
   "YuzakiKokuban/meta-hybrid_mount": "320142758",
@@ -104,5 +104,6 @@
   "sunilpaulmathew/De-Bloater": "306330279",
   "chisewaguri/systemapp_nuker": "319845508",
   "Mahmud0808/PixelLauncherEnhanced": "311103570",
-  "ahmedmani/pairipfix": "311226520"
+  "ahmedmani/pairipfix": "311226520",
+  "re-zero001/LSPosed-Irena": "322632963"
 }
