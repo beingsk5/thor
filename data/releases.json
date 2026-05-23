@@ -501,8 +501,8 @@
   },
   {
     "repo": "libre-tube/LibreTube",
-    "tag": "v31.2",
-    "date": "2026-05-15"
+    "tag": "v31.3",
+    "date": "2026-05-23"
   },
   {
     "repo": "Anthonyy232/Paperize",
@@ -546,8 +546,8 @@
   },
   {
     "repo": "DP-Hridayan/aShellYou",
-    "tag": "v7.2.1",
-    "date": "2026-04-27"
+    "tag": "v7.4.0",
+    "date": "2026-05-22"
   },
   {
     "repo": "JingMatrix/TEESimulator",
@@ -661,7 +661,7 @@
   },
   {
     "repo": "MorpheApp/morphe-manager",
-    "tag": "v1.17.1",
-    "date": "2026-05-12"
+    "tag": "none",
+    "date": ""
   }
 ]
