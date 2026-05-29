@@ -501,8 +501,8 @@
   },
   {
     "repo": "libre-tube/LibreTube",
-    "tag": "v31.3",
-    "date": "2026-05-23"
+    "tag": "v31.4",
+    "date": "2026-05-28"
   },
   {
     "repo": "Anthonyy232/Paperize",
@@ -661,7 +661,7 @@
   },
   {
     "repo": "MorpheApp/morphe-manager",
-    "tag": "none",
-    "date": ""
+    "tag": "v1.19.1",
+    "date": "2026-05-29"
   }
 ]
