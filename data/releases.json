@@ -526,8 +526,8 @@
   },
   {
     "repo": "cygnusx-1-org/continuum",
-    "tag": "8.2.5.9.9.6",
-    "date": "2026-07-07"
+    "tag": "8.2.5.9.9.7",
+    "date": "2026-07-11"
   },
   {
     "repo": "albu-razvan/Stario",
@@ -571,8 +571,8 @@
   },
   {
     "repo": "j-hc/revanced-magisk-module",
-    "tag": "20221063",
-    "date": "2026-06-23"
+    "tag": "20221065",
+    "date": "2026-07-10"
   },
   {
     "repo": "Numbersf/MakeFontsGreatAgain",
@@ -661,7 +661,7 @@
   },
   {
     "repo": "MorpheApp/morphe-manager",
-    "tag": "v1.21.0",
-    "date": "2026-06-10"
+    "tag": "v1.23.0",
+    "date": "2026-07-11"
   }
 ]
