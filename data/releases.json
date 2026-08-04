@@ -526,8 +526,8 @@
   },
   {
     "repo": "cygnusx-1-org/continuum",
-    "tag": "8.2.5.9.9.9",
-    "date": "2026-07-28"
+    "tag": "8.2.5.9.9.9.1",
+    "date": "2026-08-04"
   },
   {
     "repo": "albu-razvan/Stario",
@@ -651,8 +651,8 @@
   },
   {
     "repo": "AlirezaParsi/COPG",
-    "tag": "v6.1.2",
-    "date": "2026-07-29"
+    "tag": "v6.2.5",
+    "date": "2026-08-03"
   },
   {
     "repo": "trinadhthatakula/Bolt",
