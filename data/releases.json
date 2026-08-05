@@ -386,8 +386,8 @@
   },
   {
     "repo": "JingMatrix/LSPosed",
-    "tag": "v2.1",
-    "date": "2026-08-02"
+    "tag": "v2.2",
+    "date": "2026-08-04"
   },
   {
     "repo": "JingMatrix/NeoZygisk",
@@ -406,8 +406,8 @@
   },
   {
     "repo": "Dr-TSNG/ZygiskNext",
-    "tag": "v1.4.4",
-    "date": "2026-08-01"
+    "tag": "v1.4.5",
+    "date": "2026-08-05"
   },
   {
     "repo": "KOWX712/Tricky-Addon-Update-Target-List",
@@ -476,8 +476,8 @@
   },
   {
     "repo": "MeowDump/Integrity-Box",
-    "tag": "v39",
-    "date": "2026-07-17"
+    "tag": "v40",
+    "date": "2026-08-05"
   },
   {
     "repo": "himanshujjp/PlayStoreSelfUpdateBlocker",
