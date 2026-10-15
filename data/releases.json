@@ -211,8 +211,8 @@
   },
   {
     "repo": "revenge-mod/revenge-xposed",
-    "tag": "1701",
-    "date": "2026-10-09"
+    "tag": "1801",
+    "date": "2026-10-15"
   },
   {
     "repo": "Droid-ify/client",
@@ -321,8 +321,8 @@
   },
   {
     "repo": "chenxiaolong/BCR",
-    "tag": "v3.10",
-    "date": "2026-10-13"
+    "tag": "v3.11",
+    "date": "2026-10-15"
   },
   {
     "repo": "Dr-TSNG/Hide-My-Applist",
@@ -406,8 +406,8 @@
   },
   {
     "repo": "Dr-TSNG/ZygiskNext",
-    "tag": "v1.5.0",
-    "date": "2026-08-26"
+    "tag": "v1.5.2",
+    "date": "2026-10-15"
   },
   {
     "repo": "KOWX712/Tricky-Addon-Update-Target-List",
