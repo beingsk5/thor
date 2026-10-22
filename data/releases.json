@@ -211,8 +211,8 @@
   },
   {
     "repo": "revenge-mod/revenge-xposed",
-    "tag": "1902",
-    "date": "2026-10-20"
+    "tag": "1903",
+    "date": "2026-10-22"
   },
   {
     "repo": "Droid-ify/client",
@@ -526,8 +526,8 @@
   },
   {
     "repo": "cygnusx-1-org/continuum",
-    "tag": "none",
-    "date": ""
+    "tag": "8.3.3.6",
+    "date": "2026-10-21"
   },
   {
     "repo": "albu-razvan/Stario",
