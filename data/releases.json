@@ -651,17 +651,17 @@
   },
   {
     "repo": "AlirezaParsi/COPG",
-    "tag": "v7.5.1",
-    "date": "2026-10-09"
+    "tag": "v7.6.0",
+    "date": "2026-10-23"
   },
   {
     "repo": "trinadhthatakula/Bolt",
-    "tag": "Bolt_v1.01.0",
-    "date": "2025-07-13"
+    "tag": "Bolt_v1.02.0",
+    "date": "2026-10-22"
   },
   {
     "repo": "MorpheApp/morphe-manager",
-    "tag": "v1.35.0",
-    "date": "2026-10-10"
+    "tag": "v2.1.0",
+    "date": "2026-10-23"
   }
 ]
